@@ -12,7 +12,7 @@ import React, { useState, useEffect } from "react";
 import { BiChevronDown, BiChevronUp } from "react-icons/bi";
 
 export const Cartao = (props) => {
-  const [collapse, setCollapse] = useState(true);
+  const [collapse, setCollapse] = useState(false);
   const toggle = () => setCollapse(!collapse);
 
   const item = props.item;

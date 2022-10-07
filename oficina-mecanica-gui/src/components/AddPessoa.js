@@ -1,7 +1,15 @@
 import React, { useState, useEffect } from "react";
 import PessoasService from "../Services/PessoasService";
 import LocaisList from "./LocaisList";
+import VeiculosList from "./VeiculosList";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import OverlayTrigger from 'react-bootstrap/OverlayTrigger';
+import Tooltip from 'react-bootstrap/Tooltip';
+import { faCar } from '@fortawesome/free-solid-svg-icons'
+import Modal from 'react-bootstrap/Modal';
+
 const Addpessoa = (props) => {
+  const [lgShow, setLgShow] = useState(false);
 //JSON CLIENTE
   const initialPessoaState =
     {
@@ -37,16 +45,21 @@ const Addpessoa = (props) => {
   const changeParentSubmit = ()=>{
     props.changePaiSubmit();
   }
+
   return (
     <div className="submit-form">
       <div>
+        {props.funcao == 1?
+        <h4>Cadastro de Clientes</h4>
+        :<h4>Cadastro de funcionários</h4>
+      }
         {pessoa.cod_pessoa? 
         <div className="form-group">
-            <label>Id</label>
+            <label>Código do cliente</label>
             <input disabled="disabled"
             type="text"
             className="form-control"
-              value={pessoa.cod_pessoa}
+              value={props.cliente.cod_cliente}
             />
         </div>
         : <></>}
@@ -87,6 +100,40 @@ const Addpessoa = (props) => {
           <br/>
         <div>
             <LocaisList pessoa ={pessoa} changeCidade = {changeCidade}  changeVoSubmit={changeParentSubmit}/>
+        </div>
+        <br/>
+        <div>
+        {(props.cliente.cod_cliente != null)?
+        <div>
+          <span onClick={() => setLgShow(true)}>
+                  <OverlayTrigger
+                  delay={{hide: 5 }}
+                      key={"vel"}
+                      placement={"top"}
+                       overlay={
+                          <Tooltip id={`tooltip-${"del"}`}>
+                            <strong>{"Adicionar veículos"}</strong>.
+                          </Tooltip>
+                        }> 
+                      <FontAwesomeIcon icon={faCar}/>
+                    </OverlayTrigger>
+              
+              </span>
+            
+            <Modal
+            scrollable={true}
+        show={lgShow}
+        onHide={() => setLgShow(false)}
+      >
+        <Modal.Header closeButton>
+          <Modal.Title>
+            Cadastro de veículos
+          </Modal.Title>
+        </Modal.Header>
+        <Modal.Body><VeiculosList codCliente = {props.cliente.cod_cliente}/></Modal.Body>
+      </Modal>
+          </div> : <></>
+        }        
         </div>
         </div>
     </div>

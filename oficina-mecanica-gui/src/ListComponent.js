@@ -4,6 +4,20 @@ import { reorder } from "./helpers.js";
 import { Cartao } from "./cartao";
 
 export const ListComponent = (props) => {
+  const monthNames = ["Jan", "Fev", "Mar", "Abr", "Mai", "Jun",
+  "Jul", "Ago", "Set", "Out", "Nov", "Dez"
+];
+const mesesNomes = [ 'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
+const [currentDate, setCurrentDate] = useState(mesesNomes[new Date().getMonth()]+ " de " + new Date().getFullYear)
+
+/*
+  useEffect(() => {
+    var today = new Date()
+    console.log(today.getMonth()+1)
+  });*/
+  
+  const [mes, setMes] = useState(monthNames[new Date().getMonth()])
+  console.log(mes)
   const [categories, setCategories] = useState([
     {
       id: "seg",
@@ -178,9 +192,9 @@ export const ListComponent = (props) => {
       {categories.map((category, categoryIndex) => {
         return (
           <div className="category-container">
-            <h2 className="titulo" align="center">
-              {category.name}
-            </h2>
+            <h4 className="titulo" align="center">
+              {category.name + "/"+mes }
+            </h4>
             {/**Cria um elemento dropable */}
             <Drop key={category.id} id={category.id} type="droppable-for-item">
               {/**Mapeia cada item */}
@@ -193,7 +207,7 @@ export const ListComponent = (props) => {
                 );
               })}
             </Drop>
-          </div>
+          </div>   
         );
       })}
     </DragAndDrop>

@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo, useRef } from "react";
 import ClienteService from "../Services/ClienteService";
-import { Link, Route,useNavigate } from "react-router-dom";
+import { Link, Route,useNavigate, useParams } from "react-router-dom";
 import Pagination from "@material-ui/lab/Pagination";
 import { useTable } from "react-table";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -8,26 +8,42 @@ import { library } from "@fortawesome/fontawesome-svg-core";
 import { faPenToSquare, faTrashCan, faPlus } from "@fortawesome/free-solid-svg-icons";
 import OverlayTrigger from 'react-bootstrap/OverlayTrigger';
 import Tooltip from 'react-bootstrap/Tooltip';
+import VeiculoService from "../Services/VeiculoService";
+import Modal from 'react-bootstrap/Modal';
+import Button from 'react-bootstrap/Button';
+import AddVeiculo from './AddVeiculo';
 
 library.add(faPenToSquare, faTrashCan, faPlus);
 
-const ClienteList = (props) => {
-    const navigate = useNavigate();
-  const [clientes, setClientes] = useState([]);
-  /*const [currentCLiente, setCurrentCliente] = useState(null);
-  const [currentIndex, setCurrentIndex] = useState(-1);*/
-  const [searchNome, setSearchNome] = useState("");
-  const clientesRef = useRef(); //persiste entre renders ao mudar paginacao, caixa de etxto ou qqr
-  clientesRef.current = clientes; //lista inicial de clientes é mantida
+const VeiculosList = (props) => {
+  const [show, setShow] = useState(false);
+
+  const handleClose = () => {setShow(false); setVeiculo(initialVeiculoState);  setVeiculoCriado(false)
+  }
+  const handleShow = () => setShow(true);
+
+
+  const navigate = useNavigate()
+  const [searchPlaca, setSearchPlaca] = useState();
+  const [veiculosList, setVeiculosList] = useState([])
+  const veiculosRef = useRef(); //persiste entre renders ao mudar paginacao, caixa de etxto ou qqr
+  veiculosRef.current = veiculosList; //lista inicial de clientes é mantida
+
+  const codCliente = useRef() //salva uma variavel entre renders, mas nao entre reloads
+  codCliente.current = props.codCliente //persiste o codigo cliente recebido por props
+
+  const {id} = useParams() //id do cliente carregado na pagina -> ver App.js :id
+
   const [page, setPage] = useState(1); //inicia na pagina 1
   const [count, setCount] = useState(0); 
   const [pageSize, setPageSize] = useState(3); //3 itens por pag
   const pageSizes = [3, 6, 9]; //itens por pagina opcoes
-  const getRequestParams = (searchNome, page, pageSize) => { //parametros para Api
+  
+  const getRequestParams = (placa, page, pageSize) => { //parametros para Api  
     let params = {};
 
-    if (searchNome) { //se houver SearchNome, se torna parametro
-      params["nome"] = searchNome;
+    if (placa) { //se houver placa
+      params["placa"] = placa;
     }
 
     if (page) {
@@ -38,26 +54,26 @@ const ClienteList = (props) => {
       params["size"] = pageSize;
     }
 
-    return params;
+    return params; //{placa: "aaa", page: 2, pageSize: 3}
   };
 
   
   useEffect(() => {
-    retrieveClientes();
+      retrieveVeiculos(props.codCliente)
   }, [page, pageSize]); //quando muda a pagina ou pageSize, reexecuta retrieveClientes
 
   
 
-  const retrieveClientes = () => {
-    const params = getRequestParams(searchNome, page, pageSize); //pega parametros
+  const retrieveVeiculos = (propsCod) => {
+    const params = getRequestParams(searchPlaca, page, pageSize); //pega parametros
 
-    ClienteService.getAll(params)
+    VeiculoService.findByCliente(id, params)
       .then(response => {
-        const { clientes, totalPages } = response.data
-        setClientes(clientes);
+        const { veiculos, totalPages } = response.data
+        setVeiculosList(veiculos);
         setCount(totalPages);
-       // if(response.status ==204)
-           // navigate("/add");
+       if(response.status ==204)
+            setVeiculosList([]);
         console.log(response.data);
       })
       .catch(e => {
@@ -72,12 +88,12 @@ const ClienteList = (props) => {
     setPage(1);
   };
   //sera executado quando o nome SearchNome for preenchido
-  const findByNome= () => {
+  const findByPlaca= () => {
     setPage(1);
-    retrieveClientes(); //O nome se torna um parametro
+    retrieveVeiculos(); //O nome se torna um parametro
   };
   const refreshList = () => {
-    retrieveClientes();
+    retrieveVeiculos();
     //setCurrentCliente(null);
    // setCurrentIndex(-1);
   };
@@ -87,23 +103,14 @@ const ClienteList = (props) => {
     setCurrentIndex(index);
   };*/
 
-  const removeAllClientes = () => {
-    ClienteService.removeAll()
-      .then(response => {
-        console.log(response.data);
-        refreshList();
-      })
-      .catch(e => {
-        console.log(e);
-      });
-  };
-  const onChangeSearchNome = (e) => {
+
+  const onChangeSearchPlaca = (e) => {
     const searchNome = e.target.value;
-    setSearchNome(searchNome);
+    setSearchPlaca(searchNome);
   };
-  const deleteCliente = (id) => {
-    const codcli = clientesRef.current[id].cod_cliente;
-    ClienteService.remove(codcli)
+  const deleteVeiculo = (id) => {
+    const placa = veiculosRef.current[id].placa;
+    VeiculoService.remove(placa)
       .then(response => {
         console.log(response.data);
         refreshList();
@@ -113,25 +120,47 @@ const ClienteList = (props) => {
       });
   };
 
-  const openCliente = (rowIndex) => {
-    const id = clientesRef.current[rowIndex].cod_cliente;
-    navigate("/clientes/edit/" + id);
+  const openVeiculo = (rowIndex) => { //ao clicar em editar abre um veiculo
+    const placa = veiculosRef.current[rowIndex].placa; //pega sua placa na celula da tabela
+    getVeiculo(placa) //busca no banco
   };
-
+const getVeiculo = (placa) =>{
+  VeiculoService.findByPlaca(placa)
+      .then(response => {
+        setVeiculo({
+          placa: response.data.placa, //preenche json
+          marca: response.data.marca,
+          modelo: response.data.modelo,
+          ano: response.data.ano,
+          cor: response.data.cor,
+          codCliente: response.data.codCliente,
+          cliente: response.data.cliente
+      });
+      setVeiculoCriado(true) //permite edicao
+        handleShow() //mostra modal
+      })
+      .catch(e => {
+        console.log(e);
+      });
+}
   //DEFINICAO TABELA
   const columns = useMemo(
     () => [
       {
-        Header: "Nome",
-        accessor: "pessoa.nome",
+        Header: "Placa",
+        accessor: "placa",
       },
       {
-        Header: "Telefone",
-        accessor: "pessoa.telefone",
+        Header: "Marca",
+        accessor: "marca",
       },
       {
-        Header: "Cidade",
-        accessor: "pessoa.cidade.name",
+        Header: "Modelo",
+        accessor: "modelo",
+      },
+      {
+        Header: "ano",
+        accessor: "ano",
       },
       {
         Header: " ",
@@ -141,14 +170,14 @@ const ClienteList = (props) => {
           return (
             <div className="row" align="center">
             <div className="col-sm">
-              <span onClick={() => openCliente(rowIdx)}> {/**rowIdx é o indice do cliente na lista clientes */}
+              <span onClick={() => openVeiculo(rowIdx)}> {/**rowIdx é o indice do cliente na lista clientes */}
               <OverlayTrigger
                       key={"ed"}
                       delay={{hide: 5 }}
                       placement={"top"}
                        overlay={
                           <Tooltip id={`tooltip-${"ed"}`}>
-                            <strong>{"editar cliente"}</strong>.
+                            <strong>{"editar veiculo"}</strong>.
                           </Tooltip>
                         }>  
                       <FontAwesomeIcon icon="fa-solid fa-pen-to-square" />
@@ -157,14 +186,14 @@ const ClienteList = (props) => {
               </span>
             </div>
             <div className="col-sm">
-              <span onClick={() => deleteCliente(rowIdx)}>
+              <span onClick={() => deleteVeiculo(rowIdx)}>
                   <OverlayTrigger
                   delay={{hide: 5 }}
                       key={"del"}
                       placement={"top"}
                        overlay={
                           <Tooltip id={`tooltip-${"del"}`}>
-                            <strong>{"deletar cliente"}</strong>.
+                            <strong>{"deletar veiculo"}</strong>.
                           </Tooltip>
                         }>  
                       <FontAwesomeIcon icon="fa-solid fa-trash-can" />
@@ -172,21 +201,6 @@ const ClienteList = (props) => {
               
               </span>
               </div>  
-              <div className="col-sm">
-              <span onClick={() => navigate("/add")}>
-              <OverlayTrigger
-              delay={{hide: 5 }}
-                      key={"cri"}
-                      placement={"top"}
-                       overlay={
-                          <Tooltip id={`tooltip-${"cri"}`}>
-                            <strong>{"novo cliente"}</strong>.
-                          </Tooltip>
-                        }>  
-                      <FontAwesomeIcon icon="fa-solid fa-plus" />
-                    </OverlayTrigger>
-              </span>
-              </div> 
             </div>
           );
         },
@@ -204,27 +218,87 @@ const ClienteList = (props) => {
     prepareRow,
   } = useTable({ //tabela usada
     columns, //colunas definidas acima
-    data: clientes, //dados com acessor
+    data: veiculosList, //dados com accessor
   });
 
+  const initialVeiculoState =
+  {
+      placa: "",
+      marca: "",
+      modelo: "",
+      ano: "",
+      cor: "",
+      codCliente: null,
+      cliente: null
+      }
+    
+const [veiculo, setVeiculo] = useState(initialVeiculoState);
+const [veiculoCriado, setVeiculoCriado] = useState(false);
+  const saveVeiculo= () => {
+    //faz o Post
+    VeiculoService.create(veiculo.placa, id) 
+      .then(response => {
+        setVeiculo({
+            placa: response.data.placa,
+            marca: response.data.marca,
+            modelo: response.data.modelo,
+            ano: response.data.ano,
+            cor: response.data.cor,
+            codCliente: response.data.codCliente,
+            cliente: response.data.cliente
+        });
+        setVeiculoCriado(true)
+ console.log(response)
+    })
+      .catch(e => {
+        console.log(e);
+      });
+  };
+const updateVeiculo = () =>{
+    var data = veiculo
+
+    VeiculoService.update(data.placa, data)
+    .then(response => {
+      setVeiculo({
+        placa: response.data.placa,
+        marca: response.data.marca,
+        modelo: response.data.modelo,
+        ano: response.data.ano,
+        cor: response.data.cor,
+        codCliente: response.data.codCliente,
+        cliente: response.data.cliente
+    });
+      console.log(response);//imprime pessoa atualizada
+    })
+    .catch(e => {
+      console.log(e);
+    });
+  };
+
+//ATRIBUI VALORES À JSON VEICULO EM TEMPO REAL
+const handleInputChange = event => {
+  const { name, value } = event.target;
+  setVeiculo({ ...veiculo, [name]: value });
+  //console.log(value)
+};
   return (
-    <div className="list row" style={{paddingLeft: "10rem"}}>
-      <h3 align="center">Clientes</h3><br/><br/><br/><br/>
-      <h4>Procurar Cliente</h4>
+    <div className="list row" style={{paddingLeft: "0rem"}}>
+      <h3 align="center">Veículos do Cliente</h3><br/><br/><br/><br/>
+      <h4>Procurar Veículo</h4>
       <div className="col-md-8">
         <div className="input-group mb-3">
           <input
             type="text"
             className="form-control"
-            placeholder="Nome do cliente"
-            value={searchNome}
-            onChange={onChangeSearchNome}
+            placeholder="Placa do veículo"
+            value={searchPlaca}
+            onChange={onChangeSearchPlaca}
           />
           <div className="input-group-append">
             <button
               className="btn btn-outline-secondary"
               type="button"
-              onClick={findByNome}
+              onClick={findByPlaca}
             >
               Buscar
             </button>
@@ -244,14 +318,17 @@ const ClienteList = (props) => {
           {/**Paginacao -> indice das paginas*/}
           <Pagination
             className="my-3"
-            count={count} //contem a qtd total de paginas(paginas selecionaveis)
-            page={page} //ao mudar este valor, o indice(pagina selecionada) muda
+            count={count} //contem a qtd total de paginas
+            page={page} //ao mudar este valor, o indice muda
             siblingCount={1}
             boundaryCount={1}
             variant="outlined"
             shape="rounded"
             onChange={handlePageChange} //altera a pagina(indice) e dispara nova busca na api
           />
+          <Button variant="primary" onClick={handleShow}>
+        Cadastrar veículo
+      </Button>
         <table
           className="table table-striped table-bordered"
           {...getTableProps()}
@@ -283,8 +360,25 @@ const ClienteList = (props) => {
           </tbody>
         </table>
       </div>
+
+      <Modal show={show} onHide={handleClose}>
+        <Modal.Header closeButton>
+          <Modal.Title>Cadastro de Veículos</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+         <AddVeiculo veiculo ={veiculo} handleInputChange = {handleInputChange} criado={veiculoCriado}/>
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={handleClose}>
+            Voltar
+          </Button>
+          <Button variant="primary" onClick={veiculoCriado?updateVeiculo: saveVeiculo}>
+            Salvar
+          </Button>
+        </Modal.Footer>
+      </Modal>
     </div>
   );
 };
 
-export default ClienteList;
+export default VeiculosList;

@@ -8,7 +8,7 @@
 }
 
 .draggable {
-  display: flex;
+  /*display: flex;*/
   width: 100%; /*100% da largura do Drop pai*/
 }
 
@@ -25,7 +25,7 @@
 }
 
 .droppable {
-  width: 18vw;
+  width: 18vw; 
   height: 100%; /*ocupa 100% do category container*/
 }
 

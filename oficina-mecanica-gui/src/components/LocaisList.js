@@ -1,17 +1,18 @@
 import React, { useState, useEffect } from "react";
 import LocaisService from "../Services/LocaisService";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import {Dropdown,DropdownToggle,DropdownItem,DropdownMenu} from "reactstrap";
 import PessoasService from "../Services/PessoasService";
 import ClienteService from "../Services/ClienteService";
 
 const LocaisList = (props) => {
+  const navigate = useNavigate() 
   const [estados, setEstados] = useState([]); //Lista de estados
   const [currentEstado, setCurrentEstado] = useState(null); //Estado selecionado
   const [currentIndex, setCurrentIndex] = useState(-1); //Indice selecionado
   const [searchNome, setSearchNome] = useState(""); //Nome do estado buscado
   const [dropDownEstado, setDropDownEstado] = useState(false); //DropDown Ativo
-  
+  const [mcliente, setMcliente] = useState();
   const [cidades, setCidades] = useState([]);
   const [currentCidade, setCurrentCidade] = useState(null);
   const [currentCIndex, setCurrentCIndex] = useState(-1);
@@ -79,6 +80,7 @@ const LocaisList = (props) => {
         .then(response2 => { //apos o servico acima, que retorna a resposta2
                 console.log(response2);//imprime cliente salvo
                 props.changeVoSubmit(); //muda estado do avo AddCliente para submitted
+                navigate(`/clientes/edit/${response2.data.cod_cliente}`)
               })
               .catch(e => {
                 console.log(e);
@@ -89,7 +91,7 @@ const LocaisList = (props) => {
       });
   };
 
-  //faz o Update
+  //faz o Update da pessoa vinculada ao cliente
   const udpateCliente = () =>{
     var data = pessoa
 
@@ -185,7 +187,7 @@ const LocaisList = (props) => {
     <br/>
         <div align= "right">
           <button onClick={props.pessoa.cod_pessoa?udpateCliente :saveCliente} className="btn btn-success">
-            {props.pessoa.cod_pessoa? "Editar Cliente" : "Criar Cliente"}
+            {props.pessoa.cod_pessoa? "Salvar" : "Salvar"}
           </button>
         </div>
   </div>
