@@ -5,6 +5,7 @@ import {Dropdown,DropdownToggle,DropdownItem,DropdownMenu} from "reactstrap";
 import PessoasService from "../Services/PessoasService";
 import ClienteService from "../Services/ClienteService";
 import JuridicaServices from "../Services/JuridicaServices";
+import FisicaService from "../Services/FisicaService";
 const LocaisList = (props) => {
   const navigate = useNavigate() 
   const [estados, setEstados] = useState([]); //Lista de estados
@@ -77,14 +78,22 @@ const LocaisList = (props) => {
         });
         //depois de salvar pessoa
         if(props.personType=="juridica")
-           JuridicaServices.create(props.documento, response.data) //salva a pessoa gerada como cliente
-              .then(responsej => { //apos o servico acima, que retorna a resposta2
-                   console.log(responsej);//imprime cliente salvo
+           JuridicaServices.create(props.documento, response.data) //salva juridica se houver cnpj
+              .then(responsej => { 
+                   console.log(responsej);//imprime 
                  })
                  .catch(e => {
                     console.log(e);
                   });
-
+        if(props.personType=="fisica")
+           FisicaService.create(props.documento, response.data) //salva fisica
+              .then(responsef => { 
+                   console.log(responsef);//imprime 
+                 })
+                 .catch(e => {
+                    console.log(e);
+                  });          
+        //salva como cliente
         ClienteService.create({pessoa: response.data}) //salva a pessoa gerada como cliente
         .then(response2 => { //apos o servico acima, que retorna a resposta2
                 console.log(response2);//imprime cliente salvo
@@ -113,6 +122,42 @@ const LocaisList = (props) => {
         telefone: response.data.telefone,
         cidade:	response.data.cidade
     });
+
+    if(props.personType=="fisica")
+    FisicaService.update(response.data.cod_pessoa,props.documento) //salva fisica
+       .then(responsef => { 
+            console.log(responsef);//imprime 
+          })
+          .catch(e => {
+             console.log(e);
+           }); 
+     if(props.personType=="juridica")
+    JuridicaServices.update(response.data.cod_pessoa, props.documento) //salva juridica
+       .then(responsej => { 
+            console.log(responsej);//imprime 
+          })
+          .catch(e => {
+             console.log(e);
+           });     
+           
+     if(props.personType=="---"){
+      JuridicaServices.deleteByPessoa(response.data.cod_pessoa) //salva juridica
+      .then(responsedelj => { 
+           console.log(responsedelj);//imprime 
+         })
+         .catch(e => {
+            console.log(e);
+          });
+          FisicaService.deleteByPessoa(response.data.cod_pessoa) //salva juridica
+      .then(responsedelf => { 
+           console.log(responsedelf);//imprime 
+         })
+         .catch(e => {
+            console.log(e);
+          });         
+     }
+    
+
       console.log(response);//imprime pessoa atualizada
       props.changeVoSubmit();
     })

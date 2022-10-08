@@ -9,6 +9,9 @@ import { faCar } from '@fortawesome/free-solid-svg-icons'
 import Modal from 'react-bootstrap/Modal';
 import Form from 'react-bootstrap/Form';
 import { AddJuridica } from "./AddJuridica";
+import FisicaService from "../Services/FisicaService";
+import JuridicaServices from "../Services/JuridicaServices";
+import { AddFisica } from "./AddFisica";
 
 const Addpessoa = (props) => {
   const [lgShow, setLgShow] = useState(false);
@@ -23,10 +26,40 @@ const Addpessoa = (props) => {
         }
   //Se o pai tiver recebido um cliente na pathvariable, carrega a pessoa desse cliente      
   const [pessoa, setPessoa] = useState(initialPessoaState);
+  const [tipo, setTipo] = useState("---")
+  const [documento, setDocumento] = useState()
   useEffect(() => {
     if(props.cliente.cod_cliente)
         setPessoa(props.cliente.pessoa); 
+    if(props.cliente.pessoa)
+          getTipoAndDocumento()
   }, [props.cliente.cod_cliente]);
+
+  //Dado o codigo da pessoa, identifica se e fisica/juridica e extrai sue documento
+  const getTipoAndDocumento = () =>{
+      FisicaService.findByPessoa(props.cliente.pessoa.cod_pessoa)
+        .then(response => {
+          const {cpf} = response.data;
+          setDocumento(cpf)
+          setTipo("fisica")
+          console.log(response.data);
+        })
+        .catch(e => {
+          console.log(e);
+        });
+
+        JuridicaServices.findByPessoa(props.cliente.pessoa.cod_pessoa)
+        .then(response => {
+          const {cnpj} = response.data;
+          setDocumento(cnpj)
+          setTipo("juridica")
+          console.log(response.data);
+        })
+        .catch(e => {
+          console.log(e);
+        });
+    
+  }
 
   const changeCidade = (cd) =>{
     setPessoa({...pessoa, cidade:cd})
@@ -48,13 +81,12 @@ const Addpessoa = (props) => {
     props.changePaiSubmit();
   }
 
-  const [tipo, setTipo] = useState("---")
   const handleTipoChange = event => {
     const value = event.target.name;
     setTipo(value);
     //console.log(tipo)
   };
-const [documento, setDocumento] = useState()
+
 
 const changeDocumento = (event)=>{
   setDocumento(event.target.value)
@@ -146,8 +178,8 @@ const changeDocumento = (event)=>{
           {tipo!="---"?
           <div>
             {tipo =="juridica"?
-              <AddJuridica changeHandler={changeDocumento}/>:
-              <div>Fisica</div>
+              <AddJuridica changeHandler={changeDocumento} doc={documento}/>:
+              <AddFisica changeHandler={changeDocumento} doc={documento}/>
           }
           </div>
           :<></>}
