@@ -4,7 +4,7 @@ import { Link, useNavigate } from "react-router-dom";
 import {Dropdown,DropdownToggle,DropdownItem,DropdownMenu} from "reactstrap";
 import PessoasService from "../Services/PessoasService";
 import ClienteService from "../Services/ClienteService";
-
+import JuridicaServices from "../Services/JuridicaServices";
 const LocaisList = (props) => {
   const navigate = useNavigate() 
   const [estados, setEstados] = useState([]); //Lista de estados
@@ -76,6 +76,15 @@ const LocaisList = (props) => {
             cidade:	response.data.cidade
         });
         //depois de salvar pessoa
+        if(props.personType=="juridica")
+           JuridicaServices.create(props.documento, response.data) //salva a pessoa gerada como cliente
+              .then(responsej => { //apos o servico acima, que retorna a resposta2
+                   console.log(responsej);//imprime cliente salvo
+                 })
+                 .catch(e => {
+                    console.log(e);
+                  });
+
         ClienteService.create({pessoa: response.data}) //salva a pessoa gerada como cliente
         .then(response2 => { //apos o servico acima, que retorna a resposta2
                 console.log(response2);//imprime cliente salvo

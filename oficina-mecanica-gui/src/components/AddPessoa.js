@@ -7,6 +7,8 @@ import OverlayTrigger from 'react-bootstrap/OverlayTrigger';
 import Tooltip from 'react-bootstrap/Tooltip';
 import { faCar } from '@fortawesome/free-solid-svg-icons'
 import Modal from 'react-bootstrap/Modal';
+import Form from 'react-bootstrap/Form';
+import { AddJuridica } from "./AddJuridica";
 
 const Addpessoa = (props) => {
   const [lgShow, setLgShow] = useState(false);
@@ -46,6 +48,18 @@ const Addpessoa = (props) => {
     props.changePaiSubmit();
   }
 
+  const [tipo, setTipo] = useState("---")
+  const handleTipoChange = event => {
+    const value = event.target.name;
+    setTipo(value);
+    //console.log(tipo)
+  };
+const [documento, setDocumento] = useState()
+
+const changeDocumento = (event)=>{
+  setDocumento(event.target.value)
+  //console.log(cnpj)
+}
   return (
     <div className="submit-form">
       <div>
@@ -97,9 +111,51 @@ const Addpessoa = (props) => {
               name="telefone"
             />
           </div>
+          <div className="form-group">
+            <label>Tipo de pessoa: </label><br/>
+            <Form>
+            <div key={`inline-${"radio"}`} className="mb-3">
+            <Form.Check
+            inline
+            label="Fisica"
+            name="fisica"
+            type="radio"
+            id="inline-radio-1"
+            checked ={tipo=="fisica"? true:false}
+            onChange={handleTipoChange}
+          />
+          <Form.Check
+            inline
+            label="Juridica"
+            name="juridica"
+            type="radio"
+            id="inline-radio-2"
+            checked ={tipo=="juridica"? true:false}
+            onChange={handleTipoChange}
+          />
+          <Form.Check
+            inline
+            label="---"
+            name="---"
+            type="radio"
+            id="inline-radio-3"
+            checked ={tipo=="---"? true:false}
+            onChange={handleTipoChange}
+          />
+          </div></Form>
+          {tipo!="---"?
+          <div>
+            {tipo =="juridica"?
+              <AddJuridica changeHandler={changeDocumento}/>:
+              <div>Fisica</div>
+          }
+          </div>
+          :<></>}
+          </div>
+            
           <br/>
         <div>
-            <LocaisList pessoa ={pessoa} changeCidade = {changeCidade}  changeVoSubmit={changeParentSubmit}/>
+            <LocaisList personType = {tipo} documento ={documento} pessoa ={pessoa} changeCidade = {changeCidade}  changeVoSubmit={changeParentSubmit}/>
         </div>
         <br/>
         <div>
