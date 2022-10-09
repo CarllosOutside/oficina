@@ -5,22 +5,29 @@ import Pagination from "@material-ui/lab/Pagination";
 import { useTable } from "react-table";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { library } from "@fortawesome/fontawesome-svg-core";
-import { faPenToSquare, faTrashCan, faPlus } from "@fortawesome/free-solid-svg-icons";
+import { faPenToSquare, faTrashCan, faPlus, faClipboardList } from "@fortawesome/free-solid-svg-icons";
 import OverlayTrigger from 'react-bootstrap/OverlayTrigger';
 import Tooltip from 'react-bootstrap/Tooltip';
 import VeiculoService from "../Services/VeiculoService";
 import Modal from 'react-bootstrap/Modal';
 import Button from 'react-bootstrap/Button';
 import AddVeiculo from './AddVeiculo';
+import OrdemList from './OrdemList';
 
 library.add(faPenToSquare, faTrashCan, faPlus);
 
 const VeiculosList = (props) => {
   const [show, setShow] = useState(false);
 
+  const [showOrdem, setShowOrdem] = useState(false);
+
   const handleClose = () => {setShow(false); setVeiculo(initialVeiculoState);  setVeiculoCriado(false)
   }
   const handleShow = () => setShow(true);
+
+  const handleCloseOrdem = () =>{ setShowOrdem(false);setVeiculo(initialVeiculoState);}
+  
+  const handleShowOrdem = () => setShowOrdem(true);
 
 
   const navigate = useNavigate()
@@ -123,6 +130,13 @@ const VeiculosList = (props) => {
   const openVeiculo = (rowIndex) => { //ao clicar em editar abre um veiculo
     const placa = veiculosRef.current[rowIndex].placa; //pega sua placa na celula da tabela
     getVeiculo(placa) //busca no banco
+    setVeiculoCriado(true) //permite edicao
+        handleShow() //mostra modal
+  };
+  const openOrdem = (rowIndex) => { //ao clicar em editar abre um veiculo
+    const placa = veiculosRef.current[rowIndex].placa; //pega sua placa na celula da tabela
+    getVeiculo(placa) //busca no banco
+    handleShowOrdem() //mostra modal
   };
 const getVeiculo = (placa) =>{
   VeiculoService.findByPlaca(placa)
@@ -136,8 +150,6 @@ const getVeiculo = (placa) =>{
           codCliente: response.data.codCliente,
           cliente: response.data.cliente
       });
-      setVeiculoCriado(true) //permite edicao
-        handleShow() //mostra modal
       })
       .catch(e => {
         console.log(e);
@@ -201,6 +213,22 @@ const getVeiculo = (placa) =>{
               
               </span>
               </div>  
+              <div className="col-sm">
+              <span onClick={() => openOrdem(rowIdx)}>
+                  <OverlayTrigger
+                  delay={{hide: 5 }}
+                      key={"del"}
+                      placement={"top"}
+                       overlay={
+                          <Tooltip id={`tooltip-${"del"}`}>
+                            <strong>{"ordens de serviço"}</strong>.
+                          </Tooltip>
+                        }>  
+                      <FontAwesomeIcon icon={faClipboardList} />
+                    </OverlayTrigger>
+              
+              </span>
+              </div> 
             </div>
           );
         },
@@ -247,6 +275,7 @@ const [veiculoCriado, setVeiculoCriado] = useState(false);
             codCliente: response.data.codCliente,
             cliente: response.data.cliente
         });
+        retrieveVeiculos(props.codCliente);
         setVeiculoCriado(true)
  console.log(response)
     })
@@ -268,13 +297,14 @@ const updateVeiculo = () =>{
         codCliente: response.data.codCliente,
         cliente: response.data.cliente
     });
+    retrieveVeiculos(props.codCliente);
       console.log(response);//imprime pessoa atualizada
     })
     .catch(e => {
       console.log(e);
     });
   };
-
+  const saveOrdem = () =>{}
 //ATRIBUI VALORES À JSON VEICULO EM TEMPO REAL
 const handleInputChange = event => {
   const { name, value } = event.target;
@@ -373,6 +403,26 @@ const handleInputChange = event => {
             Voltar
           </Button>
           <Button variant="primary" onClick={veiculoCriado?updateVeiculo: saveVeiculo}>
+            Salvar
+          </Button>
+        </Modal.Footer>
+      </Modal>
+
+
+
+
+      <Modal show={showOrdem} onHide={handleCloseOrdem} centered size="lg">
+        <Modal.Header closeButton>
+          <Modal.Title>Ordens de servico</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+         <OrdemList veiculo ={veiculo}/>
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={handleCloseOrdem}>
+            Voltar
+          </Button>
+          <Button variant="primary" onClick={saveOrdem}>
             Salvar
           </Button>
         </Modal.Footer>
