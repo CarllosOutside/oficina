@@ -6,6 +6,7 @@ import PessoasService from "../Services/PessoasService";
 import ClienteService from "../Services/ClienteService";
 import JuridicaServices from "../Services/JuridicaServices";
 import FisicaService from "../Services/FisicaService";
+import FuncionarioService from "../Services/FuncionarioService";
 const LocaisList = (props) => {
   const navigate = useNavigate() 
   const [estados, setEstados] = useState([]); //Lista de estados
@@ -94,8 +95,9 @@ const LocaisList = (props) => {
                     console.log(e);
                   });          
         //salva como cliente
-        ClienteService.create({pessoa: response.data}) //salva a pessoa gerada como cliente
-        .then(response2 => { //apos o servico acima, que retorna a resposta2
+        if(props.operacao == 1)
+          ClienteService.create({pessoa: response.data}) //salva a pessoa gerada como cliente
+            .then(response2 => { //apos o servico acima, que retorna a resposta2
                 console.log(response2);//imprime cliente salvo
                 props.changeVoSubmit(); //muda estado do avo AddCliente para submitted
                 navigate(`/clientes/edit/${response2.data.cod_cliente}`)
@@ -103,7 +105,18 @@ const LocaisList = (props) => {
               .catch(e => {
                 console.log(e);
               });
-      }) 
+         //funcionario
+         if(props.operacao == 0)
+          FuncionarioService.create({pessoa: response.data}) //salva a pessoa gerada como cliente
+            .then(response2 => { //apos o servico acima, que retorna a resposta2
+                console.log(response2);//imprime cliente salvo
+                props.changeVoSubmit(); //muda estado do avo AddCliente para submitted
+                navigate(`/funcionarios/edit/${response2.data.cod_funcionario}`)
+              })
+              .catch(e => {
+                console.log(e);
+              });     
+     }) 
       .catch(e => {
         console.log(e);
       });

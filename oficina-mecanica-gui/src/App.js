@@ -11,6 +11,8 @@ import LocaisList from "./components/LocaisList";
 import Ordens from "./components/Ordens";
 import VeiculosList from "./components/VeiculosList";
 import AddVeiculo from "./components/AddVeiculo";
+import AddFuncionario from "./components/AddFuncionario";
+import FuncionariosList from "./components/FuncionariosList";
 
 export default function App() {
   return (
@@ -29,6 +31,13 @@ export default function App() {
             </Link>
           </li>
         </div>
+        <div className="navbar-nav mr-auto">
+          <li className="nav-item">
+            <Link to={"/funcionarios"} className="nav-link">
+              Funcionarios
+            </Link>
+          </li>
+        </div>
       </nav>
 
       <div className="container mt-3" style={{paddingRight: 0, marginLeft:0}}>
@@ -40,9 +49,12 @@ export default function App() {
       <Ordens />
     </div>} />
           <Route path="/clientes" element={<ClienteList/>} />
+          <Route path="/funcionarios" element={<FuncionariosList/>} />
           <Route path="/add" element={<AddCliente/>} />
           <Route path="/clientes/edit/:id" element={<AddCliente/>} />
-          <Route path="/locais" element={<LocaisList/>} />
+          <Route path="/funcionario/add" element={<AddFuncionario/>} />
+          <Route path="/funcionarios/edit/:id" element={<AddFuncionario/>} />
+          <Route path="/locais" element={<LocaisList/>} />  
           <Route path="/clientes/edit/:id/addveiculo/:placa" element={<AddVeiculo/>} />
         </Routes>
       </div>

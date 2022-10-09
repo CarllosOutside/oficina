@@ -1,31 +1,31 @@
 import React, { useState, useEffect } from "react";
-import ClienteService from "../Services/ClienteService";
 import Addpessoa  from "./AddPessoa";
 import {Navigate, useParams, Link, useNavigate} from "react-router-dom";
 import ProgressBar from 'react-bootstrap/ProgressBar';
+import FuncionarioService from "../Services/FuncionarioService";
 
-const AddCliente = () => {
+const AddFuncionario = () => {
   const navigate = useNavigate()
     //JSON CLIENTE
-  const initialClienteState = {
-    cod_cliente: null,
+  const initialFuncionarioState = {
+    cod_funcionario: null,
     pessoa: null
     }
-//cliente começa sendo nulo
-  const [cliente, setCliente] = useState(initialClienteState);
+//func começa sendo nulo
+  const [funcionario, setFuncionario] = useState(initialFuncionarioState);
 
 //path variable
 const { id }= useParams();
  //se houver path variable
   useEffect(() => {
     if (id)
-      getCliente(id);
+      getFuncionario(id);
   }, [id]);
-//Le cliente passada como pathVariable
-const getCliente = id => {
-    ClienteService.get(id)
+//Le func passada como pathVariable
+const getFuncionario = id => {
+    FuncionarioService.get(id)
       .then(response => {
-        setCliente(response.data);
+        setFuncionario(response.data);
         console.log(response.data);
       })
       .catch(e => {
@@ -36,13 +36,7 @@ const getCliente = id => {
   //a form comeca falsa, nao enviada
   const [submitted, setSubmitted] = useState(false);
 
-  //RESETA JSON
-  const newCliente = () => {
-    setCliente(initialClienteState);
-    setSubmitted(false);
-  };
-
-  //quando um cliente for salvo, o filho muda a variavel submitted e renderiza a mensagem de salvo
+  //quando um func for salvo, o filho muda a variavel submitted e renderiza a mensagem de salvo
   const changeSubmitted = () =>{
     setSubmitted(true) 
     setProgressCounter(100)
@@ -73,14 +67,14 @@ const getCliente = id => {
   return (
     <div className="submit-form" style={{paddingLeft: "10rem"}}>
         <div>
-            <Addpessoa cliente = {cliente} changePaiSubmit ={changeSubmitted}/>
+            <Addpessoa funcionario = {funcionario} changePaiSubmit ={changeSubmitted}/>
         </div>
-      <a href="/clientes">
+      <a href="/funcionarios">
               Voltar 
             </a>
-            <p>{submitted? <div>Cliente Salvo <ProgressBar animated now={progressCounter} /></div>:" "}</p>
+            <p>{submitted? <div>Funcionario Salvo <ProgressBar animated now={progressCounter} /></div>:" "}</p>
     </div>
   );
 };
 
-export default AddCliente;
+export default AddFuncionario;

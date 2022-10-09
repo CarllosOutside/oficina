@@ -28,16 +28,25 @@ const Addpessoa = (props) => {
   const [pessoa, setPessoa] = useState(initialPessoaState);
   const [tipo, setTipo] = useState("---")
   const [documento, setDocumento] = useState()
-  useEffect(() => {
+  useEffect(() => {  
+    if(props.cliente) {
     if(props.cliente.cod_cliente)
         setPessoa(props.cliente.pessoa); 
     if(props.cliente.pessoa)
           getTipoAndDocumento()
-  }, [props.cliente.cod_cliente]);
+        }}, [props.cliente? props.cliente.cod_cliente: 0]);
 
+  useEffect(() => {  
+    if(props.funcionario) {
+    if(props.funcionario.cod_funcionario)
+        setPessoa(props.funcionario.pessoa); 
+    if(props.funcionario.pessoa)
+          getTipoAndDocumento()
+}}, [props.funcionario? props.funcionario.cod_funcionario: 0]);
+  
   //Dado o codigo da pessoa, identifica se e fisica/juridica e extrai sue documento
   const getTipoAndDocumento = () =>{
-      FisicaService.findByPessoa(props.cliente.pessoa.cod_pessoa)
+      FisicaService.findByPessoa(props.cliente? props.cliente.pessoa.cod_pessoa: props.funcionario.pessoa.cod_pessoa)
         .then(response => {
           const {cpf} = response.data;
           setDocumento(cpf)
@@ -48,7 +57,7 @@ const Addpessoa = (props) => {
           console.log(e);
         });
 
-        JuridicaServices.findByPessoa(props.cliente.pessoa.cod_pessoa)
+        JuridicaServices.findByPessoa(props.cliente? props.cliente.pessoa.cod_pessoa: props.funcionario.pessoa.cod_pessoa)
         .then(response => {
           const {cnpj} = response.data;
           setDocumento(cnpj)
@@ -95,17 +104,17 @@ const changeDocumento = (event)=>{
   return (
     <div className="submit-form">
       <div>
-        {props.funcao == 1?
+        {props.cliente?
         <h4>Cadastro de Clientes</h4>
         :<h4>Cadastro de funcionários</h4>
       }
         {pessoa.cod_pessoa? 
         <div className="form-group">
-            <label>Código do cliente</label>
+            <label>{props.cliente? "Código do cliente" : "Código do funcionário"}</label>
             <input disabled="disabled"
             type="text"
             className="form-control"
-              value={props.cliente.cod_cliente}
+              value={props.cliente? props.cliente.cod_cliente: props.funcionario.cod_funcionario}
             />
         </div>
         : <></>}
@@ -187,11 +196,11 @@ const changeDocumento = (event)=>{
             
           <br/>
         <div>
-            <LocaisList personType = {tipo} documento ={documento} pessoa ={pessoa} changeCidade = {changeCidade}  changeVoSubmit={changeParentSubmit}/>
+            <LocaisList personType = {tipo} documento ={documento} pessoa ={pessoa} changeCidade = {changeCidade}  changeVoSubmit={changeParentSubmit}  operacao={props.cliente? 1:0}/>
         </div>
         <br/>
         <div>
-        {(props.cliente.cod_cliente != null)?
+        {(props.cliente && props.cliente.cod_cliente != null)?
         <div>
           <span onClick={() => setLgShow(true)}>
                   <OverlayTrigger
