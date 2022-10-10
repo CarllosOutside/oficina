@@ -14,10 +14,25 @@ const AddOrdem = (props) => {
     const [dropDown, setDropDown] = useState(false)
     useEffect(() => {
       retrieveFuncionarios(); //lista de funcionarios disponiveis
-//se estiver editando ordem, acha funcionario ja existente
+    }, []);
+ 
+    useEffect(() => {
+      console.log(props)
       if(props.criada)
           getCurrentFuncionario();
-    }, [props]);
+    }, [props.ordem.codFuncionario]);
+
+    //quando sleecionar um funcionario
+    useEffect(() => {
+     //console.log(currentFuncionario.cod_funcionario)
+     //chama a funcao handleInputchange do pai(OrdemList)
+     props.handleInputChange({ //envia como argumento um evento com campo target.name e target.value
+      target:{
+        name:"codFuncionario",
+        value: currentFuncionario.cod_funcionario
+      }
+    })
+    }, [currentFuncionario]); //executa sempre ao mudar o funcionario
 
     const getCurrentFuncionario = () =>{
       FuncionarioService.get(props.ordem.codFuncionario)
@@ -53,6 +68,9 @@ const toggleDrop = () =>{
   setDropDown(!dropDown)
   //console.log(dropDown)
 }
+
+const [teste, setTeste] =  useState(true)
+
 
   return (
     <div className="submit-form">
@@ -98,7 +116,6 @@ const toggleDrop = () =>{
               required
               disabled
               value={currentFuncionario.cod_funcionario}
-              onChange={props.handleInputChange}
               name="codFuncionario"
             />
     </div>  

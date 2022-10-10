@@ -12,8 +12,8 @@ const findByPlaca = (placa, params) => {
     return http.get(`/ordens/fucionario/${codFuncionario}`, params);
   };
 
-const create = (codFuncionario, placa) => {
-  return http.post(`/ordens/${codFuncionario}/${placa}`);
+const create = (codFuncionario, placa, dataA) => {
+  return http.post(`/ordens/${codFuncionario}/${placa}?dataAbertura=${dataA}`);
 };
 
 const remove = id => {

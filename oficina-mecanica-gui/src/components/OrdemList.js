@@ -42,6 +42,7 @@ const OrdemList = (props) => {
     setOrdem({ ...ordem, [name]: value });
     //console.log(value)
   };
+ 
   const [ordemCriada, setOrdemCriada] = useState(false); 
   const [show, setShow] = useState(false);
 
@@ -242,7 +243,7 @@ const OrdemList = (props) => {
   });
   const saveOrdem= () => {
     //faz o Post
-    OrdemService.create(ordem.codFuncionario,ordem.placa) 
+    OrdemService.create(ordem.codFuncionario,ordem.placa, ordem.dataAbertura) 
       .then(response => {
         setOrdem({
             id: response.data.id,
@@ -329,7 +330,7 @@ const updateOrdem = () =>{}
           <Modal.Title>Cadastro de Ordens</Modal.Title>
         </Modal.Header>
         <Modal.Body>
-         <AddOrdem ordem={ordem} veiculo={props.veiculo} handleInputChange = {handleInputChange} criada={ordemCriada}/>
+         <AddOrdem ordem={ordem} veiculo={props.veiculo} handleInputChange = {handleInputChange} criada={ordemCriada} />
         </Modal.Body>
         <Modal.Footer>
           <Button variant="secondary" onClick={handleClose}>
