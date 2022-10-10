@@ -7,6 +7,7 @@ import ClienteService from "../Services/ClienteService";
 import JuridicaServices from "../Services/JuridicaServices";
 import FisicaService from "../Services/FisicaService";
 import FuncionarioService from "../Services/FuncionarioService";
+
 const LocaisList = (props) => {
   const navigate = useNavigate() 
   const [estados, setEstados] = useState([]); //Lista de estados

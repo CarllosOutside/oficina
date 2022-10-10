@@ -20,12 +20,17 @@ const findByNome = nome => {
   return http.get(`/funcionarios?nome=${nome}`);
 };
 
+const getLista = () =>{
+  return http.get(`/funcionarios/lista`);
+}
+
 const FuncionarioService = {
   getAll,
   get,
   create,
   remove,
-  findByNome
+  findByNome,
+  getLista
 };
 
 export default FuncionarioService;
