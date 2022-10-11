@@ -36,11 +36,10 @@ export const Cartao = (props) => {
       <CardBody style={{ backgroundColor: item.bcolor }}>
         <Collapse isOpen={collapse}>
           <CardText style={{ fontSize: "1.2vw" }}>
-            <div>Modelo: {item.modelo}</div>
-            <div>Valor em peças: R$ {item.vpeca}</div>
-            <div>Valor em mão de obra: R$ {item.vmobra}</div>
-            <div>Total: R$ {item.vmobra + item.vpeca}</div>
-            <div>Relatorio: {item.relatorio}</div>
+            <div>Modelo: {item.veiculo.marca+" - "+item.veiculo.modelo}</div>
+            <div>Valor em peças: R$ {item.valorTotalPecas}</div>
+            <div>Valor em mão de obra: R$ {item.valorTotalServicos}</div>
+    <div>Total: R$ {item.valorTotalPecas + item.valorTotalServicos}</div>
           </CardText>
         </Collapse>
 

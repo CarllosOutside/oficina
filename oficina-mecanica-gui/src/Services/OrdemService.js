@@ -7,6 +7,10 @@ const get = id => {
 const findByPlaca = (placa, params) => {
     return http.get(`/ordens/veiculo/${placa}`, params);
   };
+ 
+  const findByAnoMes = (ano, mes) => {
+    return http.get(`/ordens/${ano}/${mes}`)
+  };
 
   const findByFuncionario = (codFuncionario, params) => {
     return http.get(`/ordens/fucionario/${codFuncionario}`, params);
@@ -26,7 +30,8 @@ const OrdemService = {
   create,
   remove,
   findByPlaca,
-  findByFuncionario
+  findByFuncionario,
+  findByAnoMes
 };
 
 export default OrdemService;

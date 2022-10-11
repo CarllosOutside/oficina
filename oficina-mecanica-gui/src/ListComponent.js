@@ -1,129 +1,104 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo, useRef } from "react";
 import { DragAndDrop, Drag, Drop } from "./drag-and-drop";
 import { reorder } from "./helpers.js";
 import { Cartao } from "./cartao";
+import moment from "moment-timezone";
+import OrdemService from "./Services/OrdemService";
+import Ordens from "./components/Ordens";
 
 export const ListComponent = (props) => {
+  
   const monthNames = ["Jan", "Fev", "Mar", "Abr", "Mai", "Jun",
   "Jul", "Ago", "Set", "Out", "Nov", "Dez"
 ];
-const mesesNomes = [ 'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
-const [currentDate, setCurrentDate] = useState(mesesNomes[new Date().getMonth()]+ " de " + new Date().getFullYear)
 
-/*
-  useEffect(() => {
-    var today = new Date()
-    console.log(today.getMonth()+1)
-  });*/
-  
-  const [mes, setMes] = useState(monthNames[new Date().getMonth()])
-  console.log(mes)
+const mesAtual = moment.tz("America/Sao_Paulo").format("MM");
+const anoAtual = moment.tz("America/Sao_Paulo").format("yyy");
+const [mes, setMes] = useState(monthNames[new Date().getMonth()])
+//  console.log(mes)
+const [currentOrdensList, setCurrentOrdensList] = useState([])
+
+const diaAtual = moment.tz("America/Sao_Paulo").format("d"); //dia da semana (1-7) 
+const segundaAtual = moment.tz("America/Sao_Paulo").format("DD") - diaAtual + 1; //segunda feira da semana(nº dia do mes)
+const [dias, setDias] = useState([segundaAtual, segundaAtual+1, segundaAtual+2, segundaAtual+3, segundaAtual+4]) 
+
   const [categories, setCategories] = useState([
     {
-      id: "seg",
-      name: "Seg",
-      items: [
-        {
-          id: "abc",
-          placa: "teste",
-          modelo: "model test",
-          vpeca: 20,
-          vmobra: 10,
-          relatorio: "txt",
-          plac: "rgba(71, 114, 250, 0.53)",
-          bcolor: "rgba(104, 229, 26, 0.53)"
-        },
-        {
-          id: "def",
-          placa: "teste",
-          modelo: "model test",
-          vpeca: 20,
-          vmobra: 20,
-          relatorio: "txt",
-          plac: "rgba(71, 114, 250, 0.53)",
-          bcolor: "rgba(104, 229, 26, 0.53)"
-        }
-      ]
+      id: anoAtual+"-"+mesAtual+"-"+dias[0],
+      name: "seg.",
+      key: "segunda",
+      items: []
     },
     {
-      id: "ter",
-      name: "Ter",
-      items: [
-        {
-          id: "ghi",
-          placa: "teste",
-          modelo: "model test",
-          vpeca: 20,
-          vmobra: 10,
-          relatorio: "txt",
-          plac: "rgba(72, 73, 73, 0.53)",
-          bcolor: "rgba(104, 229, 26, 0.53)"
-        },
-        {
-          id: "jkl",
-          placa: "teste",
-          modelo: "model test",
-          vpeca: 20,
-          vmobra: 10,
-          relatorio: "txt",
-          plac: "rgba(72, 73, 73, 0.53)",
-          bcolor: "rgba(72, 73, 73, 0.53)"
-        }
-      ]
+      id: anoAtual+"-"+mesAtual+"-"+dias[1],
+      name: "ter.",
+      key: "terca",
+      items: []
     },
     {
-      id: "qua",
-      name: "Qua",
-      items: [
-        {
-          id: "abd",
-          placa: "teste",
-          modelo: "model test",
-          vpeca: 20,
-          vmobra: 10,
-          relatorio: "txt",
-          plac: "rgba(71, 114, 250, 0.53)",
-          bcolor: "rgba(104, 229, 26, 0.53)"
-        }
-      ]
+      id: anoAtual+"-"+mesAtual+"-"+dias[2],
+      name: "qua.",
+      key: "quarta",
+      items: []
     },
     {
-      id: "qui",
-      name: "Qui",
-      items: [
-        {
-          id: "sss",
-          placa: "teste",
-          modelo: "model test",
-          vpeca: 20,
-          vmobra: 10,
-          relatorio: "txt",
-          plac: "rgba(72, 73, 73, 0.53)",
-          bcolor: "rgba(104, 229, 26, 0.53)"
-        }
-      ]
+      id: anoAtual+"-"+mesAtual+"-"+dias[3],
+      name: "qui.",
+      key: "quinta",
+      items: []
     },
     {
-      id: "sex",
-      name: "Sex",
-      items: [
-        {
-          id: "aca",
-          placa: "teste",
-          modelo: "model test",
-          vpeca: 20,
-          vmobra: 10,
-          relatorio: "txt",
-          plac: "rgba(71, 114, 250, 0.53)",
-          bcolor: "rgba(104, 229, 26, 0.53)"
-        }
-      ]
+      id: anoAtual+"-"+mesAtual+"-"+dias[4],
+      name: "sex.",
+      key: "sexta",
+      items: []
     }
   ]);
 
+//carrega todas as ordens do corrente mes
+useEffect(() => {
+retrieveOrdens()
+}, []); 
+//adiciona ordens à current ordens lista
+  const retrieveOrdens = () =>{
+    OrdemService.findByAnoMes(anoAtual, mesAtual)
+    .then(
+      response => {
+        setCurrentOrdensList(response.data)
+       // console.log(response.data)
+      }
+    ).catch(e => {
+      console.log(e);
+    });
+  }
+
+  //função mapeia cada ordem da lista buscada na Api à sua categoria
+  const mapeiaOrdensCategorias = () =>{ 
+    currentOrdensList.forEach(ord =>{ //para cada ordem do mes  
+    //so executa 1 set
+      setCategories(currentCategories => //current = lista pega da api 
+          //para cada categoria, atualiza se necessario.
+          currentCategories.map(categ => { //para cada categoria(dia semana)
+            if (categ.id === ord.dataAbertura) { //se a data da categoria for a mesma da ordem
+              categ.items.indexOf(ord)==-1? categ.items.push(ord) : //adiciona ordem à categoria correspondente, se ela ainda nao estiver la
+              console.log(categ)
+              return categ; //retorna categ com ordem adiconada
+            }
+            //se nao bater as datas retorna categ old deixando a categoria como esta
+            return categ; 
+          }),      
+      );
+    });    
+      console.log("normal  ", categories)
+  }
+  //após carregar a lista de ordens, faz o mapeamento, inserindo-as no drop
+  useMemo(()=>{
+    mapeiaOrdensCategorias()
+  },[currentOrdensList])
+  
   //ao soltar um draggable
   const handleDragEnd = (result) => {
-    //recebe informacoes (source dropable, destination dropable e dropable type)
+    //recebe informacoes (source dropable, destination dropable e dropable type) 
     const { type, source, destination } = result;
     //console.log(type);
     if (!destination) return;
@@ -171,7 +146,7 @@ const [currentDate, setCurrentDate] = useState(mesesNomes[new Date().getMonth()]
 
         //função que atualiza as categorias
         const updatedCategories = categories.map((category) =>
-          //para cada categoria, se for origem, recebe a lista sem elemento
+          //para cada categoria, se for origem, recebe a lista sem elemento removido
           category.id === sourceCategoryId
             ? { ...category, items: sourceOrder }
             : //se for destino, recebe a lista de itens com novo elemento
@@ -179,11 +154,11 @@ const [currentDate, setCurrentDate] = useState(mesesNomes[new Date().getMonth()]
             ? { ...category, items: destinationOrder }
             : category
         );
-        //executa funcao de update
+        //executa funcao de update 
         setCategories(updatedCategories);
       }
     }
-  };
+  }; 
 
   return (
     //DragAndDrop executa OnDragEnd função
@@ -193,23 +168,23 @@ const [currentDate, setCurrentDate] = useState(mesesNomes[new Date().getMonth()]
         return (
           <div className="category-container">
             <h4 className="titulo" align="center">
-              {category.name + "/"+mes }
+              {category.name + "/"+mes}
             </h4>
             {/**Cria um elemento dropable */}
             <Drop key={category.id} id={category.id} type="droppable-for-item">
               {/**Mapeia cada item */}
               {category.items.map((item, index) => {
                 return (
-                  //Cria elementos draggables
-                  <Drag key={item.id} id={item.id} index={index}>
-                    <Cartao item={item} />
+                  //Cria elementos draggables 
+                  <Drag key={item.id} id={``+item.id} index={index}>
+                    <Cartao item={item} key={item.id}/>
                   </Drag>
                 );
               })}
             </Drop>
           </div>   
         );
-      })}
+      })} 
     </DragAndDrop>
   );
 };
