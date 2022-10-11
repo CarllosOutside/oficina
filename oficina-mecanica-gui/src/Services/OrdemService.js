@@ -5,7 +5,7 @@ const get = id => {
 };
 
 const findByPlaca = (placa, params) => {
-    return http.get(`/ordens/veiculo/${placa}`, params);
+    return http.get(`ordens/veiculo/${placa}?page=${params.page}&size=${params.size}`);
   };
  
   const findByAnoMes = (ano, mes) => {
@@ -24,6 +24,10 @@ const remove = id => {
   return http.delete(`/ordem/${id}`);
 };
 
+const update = (id, data) =>{
+  return http.put(`/ordens/${id}`, data);
+};
+
 
 const OrdemService = {
   get,
@@ -31,7 +35,8 @@ const OrdemService = {
   remove,
   findByPlaca,
   findByFuncionario,
-  findByAnoMes
+  findByAnoMes,
+  update
 };
 
 export default OrdemService;

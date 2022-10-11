@@ -261,7 +261,26 @@ const OrdemList = (props) => {
         console.log(e);
       });
   };
-const updateOrdem = () =>{}
+const updateOrdem = () =>{
+  //faz o Put
+  OrdemService.update(ordem.id, ordem) 
+  .then(response => {
+    setOrdem({
+        id: response.data.id,
+        placa: response.data.placa,
+        codFuncionario: response.data.coFuncionario,
+        dataAbertura: response.data.dataAbertura,
+        valorTotalServicos: response.data.valorTotalServicos,
+        valorTotalPecas: response.data.valorTotalPecas
+        });
+        retrieveOrdens();
+    setOrdemCriada(true)
+console.log(response)
+})
+  .catch(e => {
+    console.log(e);
+  });
+}
 
   return (
     <div className="list row" style={{paddingLeft: "0rem"}}>

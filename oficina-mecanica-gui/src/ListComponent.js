@@ -55,8 +55,9 @@ const [dias, setDias] = useState([segundaAtual, segundaAtual+1, segundaAtual+2, 
     }
   ]);
 
-//carrega todas as ordens do corrente mes
+//carrega todas as ordens do corrente mes 
 useEffect(() => {
+  console.log("lista carregada do baco")
 retrieveOrdens()
 }, []); 
 //adiciona ordens à current ordens lista
@@ -93,9 +94,29 @@ retrieveOrdens()
   }
   //após carregar a lista de ordens, faz o mapeamento, inserindo-as no drop
   useMemo(()=>{
-    mapeiaOrdensCategorias()
+    mapeiaOrdensCategorias()  
+    console.log(currentOrdensList) 
   },[currentOrdensList])
   
+  const [updatableOrdem, setUpdatableOrdem] = useState()
+
+  const updateOrdemAfterDrop = () =>{
+    //faz o Put
+    OrdemService.update(updatableOrdem.id, updatableOrdem) 
+    .then(response => {
+      setUpdatableOrdem();
+  //console.log(response)
+  })
+    .catch(e => {
+      console.log(e);
+    });
+  }
+
+
+useEffect(() => {
+ if(updatableOrdem) 
+  updateOrdemAfterDrop()
+  }, [updatableOrdem? updatableOrdem:0]); 
   //ao soltar um draggable
   const handleDragEnd = (result) => {
     //recebe informacoes (source dropable, destination dropable e dropable type) 
@@ -137,12 +158,26 @@ retrieveOrdens()
         ).items;
 
         //remove item da origem
-        const [removed] = sourceOrder.splice(source.index, 1);
+        const [removed] = sourceOrder.splice(source.index, 1); //pega um item da lista, o item em source.index
+        setUpdatableOrdem({...removed, dataAbertura: destinationCategoryId}) //ordem que sera atualziada
+        removed.dataAbertura = destinationCategoryId; //atualiza id, a ordem antiga foi completamente removida
         //insere no destino
-        destinationOrder.splice(destination.index, 0, removed);
-
+        destinationOrder.splice(destination.index, 0, removed);//insere na categoria destino com id novo
+        //atualiza na lista de ordens
+        //setCurrentOrdensList({})
         destinationOrder[removed] = sourceOrder[removed];
         delete sourceOrder[removed];
+
+        //atualiza lista de ordens, e o useMemo chama mapeamento. Como a ordem de id destination ja esta na categoria de destino, o mapeamento nao vai inserir a ordem no destino duplicada
+        setCurrentOrdensList(current =>
+          current.map(orde => {//outros itens com mesma dataAbertura nao foram removidos do source
+            if (orde.dataAbertura === sourceCategoryId && orde.id === removed.id) {
+              //atualiza apenas item dropado, que foi removido do dropsource, e sera inserido em dest
+              return {...orde, dataAbertura: destinationCategoryId}; //remove da lista curr a ordem antiga, e sobrescreve com id novo
+            }
+            return orde;
+          }),
+        );
 
         //função que atualiza as categorias
         const updatedCategories = categories.map((category) =>
@@ -155,7 +190,7 @@ retrieveOrdens()
             : category
         );
         //executa funcao de update 
-        setCategories(updatedCategories);
+        //setCategories(updatedCategories);
       }
     }
   }; 
