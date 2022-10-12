@@ -13,10 +13,8 @@ const findByPessoa = codPessoa =>{
 };
 
 const update = (codPessoa, cpf) =>{
-    return http.delete(`/juridicas/pessoa/${codPessoa}`).then
-    (
-    http.put(`/fisica/pessoa/${codPessoa}?cpf=${cpf}`)
-    );
+   http.delete(`/juridicas/pessoa/${codPessoa}`)
+   return  http.put(`/fisica/pessoa/${codPessoa}?cpf=${cpf}`)
   };
  
   const deleteByPessoa = codPessoa =>{

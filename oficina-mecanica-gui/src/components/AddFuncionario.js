@@ -69,9 +69,7 @@ const getFuncionario = id => {
         <div>
             <Addpessoa funcionario = {funcionario} changePaiSubmit ={changeSubmitted}/>
         </div>
-      <a href="/funcionarios">
-              Voltar 
-            </a>
+ 
             <p>{submitted? <div>Funcionario Salvo <ProgressBar animated now={progressCounter} /></div>:" "}</p>
     </div>
   );

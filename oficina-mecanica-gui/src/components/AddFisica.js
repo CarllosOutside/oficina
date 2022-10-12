@@ -1,5 +1,6 @@
 import React from "react";
 import { useState } from "react";
+import { IMaskInput } from "react-imask";
 
 export const AddFisica = (props) =>{
     const initialFisicaState = {
@@ -16,7 +17,7 @@ return (
 
     <div className="submit-form">
           <div className="form-group">
-            <input
+            <IMaskInput
               type="text"
               className="form-control"
               id="cpf"
@@ -24,6 +25,7 @@ return (
               value = {props.doc}
               onChange={props.changeHandler}
               name="cpf"
+              mask='000.000.000-00'
             />
           </div>
     </div>

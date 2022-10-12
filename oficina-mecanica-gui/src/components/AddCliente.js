@@ -70,14 +70,13 @@ const getCliente = id => {
   }, [progressCounter]); //executa quando mudar o valor da barra
 
 
+
   return (
     <div className="submit-form" style={{paddingLeft: "10rem"}}>
         <div>
             <Addpessoa cliente = {cliente} changePaiSubmit ={changeSubmitted}/>
         </div>
-      <a href="/clientes">
-              Voltar 
-            </a>
+
             <p>{submitted? <div>Cliente Salvo <ProgressBar animated now={progressCounter} /></div>:" "}</p>
     </div>
   );

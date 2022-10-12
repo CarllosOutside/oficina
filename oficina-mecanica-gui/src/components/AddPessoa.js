@@ -12,6 +12,7 @@ import { AddJuridica } from "./AddJuridica";
 import FisicaService from "../Services/FisicaService";
 import JuridicaServices from "../Services/JuridicaServices";
 import { AddFisica } from "./AddFisica";
+import { IMaskInput } from "react-imask";
 
 const Addpessoa = (props) => {
   const [lgShow, setLgShow] = useState(false);
@@ -143,13 +144,14 @@ const changeDocumento = (event)=>{
           </div>
           <div className="form-group">
             <label>Telefone</label>
-            <input
+            <IMaskInput
               type="text"
               className="form-control"
               id="telefone"
               value={pessoa.telefone}
               onChange={handleInputChange}
               name="telefone"
+              mask='(00)00000-0000'
             />
           </div>
           <div className="form-group">
@@ -194,15 +196,15 @@ const changeDocumento = (event)=>{
           :<></>}
           </div>
             
-          <br/>
+          <br/> 
+        <div style={{display:"flex"}}>
         <div>
             <LocaisList personType = {tipo} documento ={documento} pessoa ={pessoa} changeCidade = {changeCidade}  changeVoSubmit={changeParentSubmit}  operacao={props.cliente? 1:0}/>
         </div>
-        <br/>
-        <div>
         {(props.cliente && props.cliente.cod_cliente != null)?
-        <div>
-          <span onClick={() => setLgShow(true)}>
+        <div style={{marginLeft:"22rem"}}>
+          Veículos do cliente: 
+          <span onClick={() => setLgShow(true)} style={{margin: "1rem"}}>
                   <OverlayTrigger
                   delay={{hide: 5 }}
                       key={"vel"}

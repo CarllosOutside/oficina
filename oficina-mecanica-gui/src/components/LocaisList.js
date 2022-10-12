@@ -7,8 +7,11 @@ import ClienteService from "../Services/ClienteService";
 import JuridicaServices from "../Services/JuridicaServices";
 import FisicaService from "../Services/FisicaService";
 import FuncionarioService from "../Services/FuncionarioService";
+import Toast from 'react-bootstrap/Toast';
+import ToastContainer from 'react-bootstrap/ToastContainer';
 
 const LocaisList = (props) => {
+  const [show, setShow] = useState(false); //toast
   const navigate = useNavigate() 
   const [estados, setEstados] = useState([]); //Lista de estados
   const [currentEstado, setCurrentEstado] = useState(null); //Estado selecionado
@@ -30,7 +33,6 @@ const LocaisList = (props) => {
   const toggleCidade= () =>{
     setDropDownCidade(!dropDownCidade)
   }
-
   useEffect(() => {
     retrieveEstados();
   }, []);
@@ -91,6 +93,8 @@ const LocaisList = (props) => {
            FisicaService.create(props.documento, response.data) //salva fisica
               .then(responsef => { 
                    console.log(responsef);//imprime 
+                   if(responsef.status == 500)
+                    setShow(true)
                  })
                  .catch(e => {
                     console.log(e);
@@ -143,7 +147,9 @@ const LocaisList = (props) => {
             console.log(responsef);//imprime 
           })
           .catch(e => {
-             console.log(e);
+             console.log(e); 
+             if(e.code=='ERR_BAD_RESPONSE')
+                    setShow(true)
            }); 
      if(props.personType=="juridica")
     JuridicaServices.update(response.data.cod_pessoa, props.documento) //salva juridica
@@ -210,13 +216,20 @@ const LocaisList = (props) => {
   };
 
   const faznada = () => {}
+  const volta = () =>{
+    if(props.operacao ==1)
+      navigate('/clientes');
+    if(props.operacao == 0)
+      navigate('/funcionarios')  
+  }
   return (
   <div className="list row">
 
     {/**container estado */}
+    <div style={{display:"flex"}}>
     <div className="col-md-3">
       <Dropdown isOpen={dropDownEstado} toggle={toggleEstado}>
-        <DropdownToggle caret>
+        <DropdownToggle caret color="primary">
          {currentEstado? currentEstado.name: (props.pessoa.cidade? props.pessoa.cidade.state_id.name: "Selecione um Estado")}
         </DropdownToggle>
          <DropdownMenu container="body">
@@ -234,9 +247,9 @@ const LocaisList = (props) => {
     </div>
 
     {/**container cidades */}
-    <div className="col-md-3">
+    <div className="col-md-3" style={{marginLeft: "5rem"}}>
       <Dropdown isOpen={dropDownCidade} toggle={toggleCidade} disabled={currentEstado? false: true} >
-        <DropdownToggle caret>
+        <DropdownToggle caret color="primary">
         {currentCidade? currentCidade.name: (props.pessoa.cidade? props.pessoa.cidade.name: "Selecione uma Cidade")}
         </DropdownToggle>
          <DropdownMenu container="body">
@@ -252,11 +265,29 @@ const LocaisList = (props) => {
          </DropdownMenu>
       </Dropdown>
     </div>
+    </div>
     <br/>
-        <div align= "right">
-          <button onClick={props.pessoa.cod_pessoa?udpateCliente :saveCliente} className="btn btn-success">
+        
+        <ToastContainer position="top-end" className="p-3">
+        <Toast onClose={() => setShow(false)} show={show} delay={5000} autohide>
+          <Toast.Header>
+            <img
+              src="holder.js/20x20?text=%20"
+              className="rounded me-2"
+              alt=""
+            />
+            <strong className="me-auto">Cpf inválido</strong>
+          </Toast.Header>
+          <Toast.Body>O cliente foi salvo sem cpf</Toast.Body>
+        </Toast></ToastContainer>
+        <div align= "left">
+          <br/>
+          <button onClick={props.pessoa.cod_pessoa?udpateCliente :saveCliente} className="btn btn-success" style={{ marginLeft:"55rem", position: "absolute", marginTop:"2.4rem"}}>
             {props.pessoa.cod_pessoa? "Salvar" : "Salvar"}
           </button>
+          <button onClick={volta} className="btn btn-danger" style={{marginTop:"2.4rem"}}>
+              Voltar 
+            </button>
         </div>
   </div>
   );
