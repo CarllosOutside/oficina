@@ -3,7 +3,8 @@ import React from "react";
 import { useState, useEffect } from "react";
 import moment from "moment-timezone";
 import 'moment/locale/pt';
-
+import Calendar from 'react-calendar';
+import 'react-calendar/dist/Calendar.css';
 const Ordens = () => {
     
     const mesesNomes = [ 'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
@@ -14,7 +15,11 @@ const Ordens = () => {
     
       return(
         <div style={{textAlign:"center"}}>
-            <div align="center" style={{ fontSize: "2vw"}}>{currentDate}</div>
+            <div>
+            <Calendar  
+            defaultView='year'
+            tileDisabled={({ view, date }) => (date.getDay() != 1 && view=='month')}/>
+            </div>
             <br/>
         <div style = {{display: "flex", marginTop: 8}}>
             <ListComponent time={currentDate}/>
