@@ -130,8 +130,8 @@ const [teste, setTeste] =  useState(true)
               type="text"
               className="form-control"
               id="placa"
-              disabled={props.criada? true:false}
-              value={props.ordem.placa}
+              disabled={true}//props.criada? true:false}
+              value={ props.veiculo.placa}//props.ordem.placa}
               onChange={props.handleInputChange}
               name="placa"
             />
