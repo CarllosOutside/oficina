@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { useState } from "react";
 import { IMaskInput } from "react-imask";
 
@@ -7,6 +7,10 @@ export const AddFisica = (props) =>{
         cpf: "",
         cod_pessoa: null
     }
+    useEffect(()=>{
+
+},[props]);
+
 const [fisica, setFisica] = useState(initialFisicaState)
     const changeHandler = event => {
         const { name, value } = event.target;

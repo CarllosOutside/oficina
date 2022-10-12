@@ -87,8 +87,10 @@ const [teste, setTeste] =  useState(true)
         : <></>}
 
            {/**container estado */}
-           <div className="list row">
-           <div className="col-md-3">
+           <div style={{display:"flex", gap:"50rem",marginTop:"45px"}}>
+           
+           <div>
+           <label>Selecione um mecânico:</label>
     <Dropdown isOpen={dropDown} toggle={toggleDrop}>
         <Dropdown.Toggle caret>
          {(currentFuncionario.pessoa)? currentFuncionario.pessoa.nome: "Selecione funcionário"}
@@ -108,8 +110,8 @@ const [teste, setTeste] =  useState(true)
       </Dropdown>
     </div>
           
-    <div className="col-md-3">
-      <label>Código do Funcionário:</label>
+    <div className="list row">
+      <label>Código do mecânico</label>
     <input
               type="number"
               id="codFuncionario"
@@ -121,6 +123,7 @@ const [teste, setTeste] =  useState(true)
     </div>  
     
     </div>
+    <br/>
           <div className="form-group">
             <label>Placa</label>
             <input

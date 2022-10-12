@@ -3,6 +3,8 @@ import Addpessoa  from "./AddPessoa";
 import {Navigate, useParams, Link, useNavigate} from "react-router-dom";
 import ProgressBar from 'react-bootstrap/ProgressBar';
 import FuncionarioService from "../Services/FuncionarioService";
+import Toast from 'react-bootstrap/Toast';
+import ToastContainer from 'react-bootstrap/ToastContainer';
 
 const AddFuncionario = () => {
   const navigate = useNavigate()
@@ -69,8 +71,14 @@ const getFuncionario = id => {
         <div>
             <Addpessoa funcionario = {funcionario} changePaiSubmit ={changeSubmitted}/>
         </div>
- 
-            <p>{submitted? <div>Funcionario Salvo <ProgressBar animated now={progressCounter} /></div>:" "}</p>
+        <ToastContainer className="p-3" position={"bottom-center"}>
+          <Toast show={submitted}>
+            <Toast.Header closeButton={false}>
+              <strong className="me-auto">Funcionário salvo</strong>
+            </Toast.Header>
+            <Toast.Body><ProgressBar animated now={progressCounter} /></Toast.Body>
+          </Toast>
+        </ToastContainer>
     </div>
   );
 };

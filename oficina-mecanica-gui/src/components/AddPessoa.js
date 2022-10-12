@@ -197,7 +197,7 @@ const changeDocumento = (event)=>{
           </div>
             
           <br/> 
-        <div style={{display:"flex"}}>
+        <div style={{display:"flex"}} className="form-group">
         <div>
             <LocaisList personType = {tipo} documento ={documento} pessoa ={pessoa} changeCidade = {changeCidade}  changeVoSubmit={changeParentSubmit}  operacao={props.cliente? 1:0}/>
         </div>

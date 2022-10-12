@@ -3,7 +3,8 @@ import ClienteService from "../Services/ClienteService";
 import Addpessoa  from "./AddPessoa";
 import {Navigate, useParams, Link, useNavigate} from "react-router-dom";
 import ProgressBar from 'react-bootstrap/ProgressBar';
-
+import Toast from 'react-bootstrap/Toast';
+import ToastContainer from 'react-bootstrap/ToastContainer';
 const AddCliente = () => {
   const navigate = useNavigate()
     //JSON CLIENTE
@@ -76,8 +77,14 @@ const getCliente = id => {
         <div>
             <Addpessoa cliente = {cliente} changePaiSubmit ={changeSubmitted}/>
         </div>
-
-            <p>{submitted? <div>Cliente Salvo <ProgressBar animated now={progressCounter} /></div>:" "}</p>
+        <ToastContainer className="p-3" position={"bottom-center"}>
+          <Toast show={submitted}>
+            <Toast.Header closeButton={false}>
+              <strong className="me-auto">Cliente salvo</strong>
+            </Toast.Header>
+            <Toast.Body><ProgressBar animated now={progressCounter} /></Toast.Body>
+          </Toast>
+        </ToastContainer>
     </div>
   );
 };

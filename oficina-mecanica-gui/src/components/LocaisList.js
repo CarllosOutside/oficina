@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import LocaisService from "../Services/LocaisService";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import {Dropdown,DropdownToggle,DropdownItem,DropdownMenu} from "reactstrap";
 import PessoasService from "../Services/PessoasService";
 import ClienteService from "../Services/ClienteService";
@@ -11,6 +11,7 @@ import Toast from 'react-bootstrap/Toast';
 import ToastContainer from 'react-bootstrap/ToastContainer';
 
 const LocaisList = (props) => {
+  const {id} = useParams() //pega id do cliente/funcionario na path variable
   const [show, setShow] = useState(false); //toast
   const navigate = useNavigate() 
   const [estados, setEstados] = useState([]); //Lista de estados
@@ -65,6 +66,7 @@ const LocaisList = (props) => {
       });
   };
 
+ const [docInvalido, setDocInvalido] = useState()
   //SALVA COM POST E DEPOIS SETA A JSON COM A RESPOSTA VINDA DA API, QUE DEVE CONTER UM ID GERADO
   const saveCliente= () => {
     //pessoa a ser salva
@@ -88,16 +90,20 @@ const LocaisList = (props) => {
                  })
                  .catch(e => {
                     console.log(e);
+                    if(e.code=='ERR_BAD_RESPONSE')
+                      setShow(true)    
+                      setDocInvalido("cnpj")
                   });
         if(props.personType=="fisica")
            FisicaService.create(props.documento, response.data) //salva fisica
               .then(responsef => { 
                    console.log(responsef);//imprime 
-                   if(responsef.status == 500)
-                    setShow(true)
                  })
                  .catch(e => {
                     console.log(e);
+                    if(e.code=='ERR_BAD_RESPONSE')
+                      setShow(true)    
+                      setDocInvalido("cpf")
                   });          
         //salva como cliente
         if(props.operacao == 1)
@@ -127,7 +133,7 @@ const LocaisList = (props) => {
       });
   };
 
-  //faz o Update da pessoa vinculada ao cliente
+  //faz o Update da pessoa vinculada ao cliente/funcionario
   const udpateCliente = () =>{
     var data = pessoa
 
@@ -149,7 +155,8 @@ const LocaisList = (props) => {
           .catch(e => {
              console.log(e); 
              if(e.code=='ERR_BAD_RESPONSE')
-                    setShow(true)
+                    setShow(true)    
+                    setDocInvalido("cpf")
            }); 
      if(props.personType=="juridica")
     JuridicaServices.update(response.data.cod_pessoa, props.documento) //salva juridica
@@ -158,6 +165,9 @@ const LocaisList = (props) => {
           })
           .catch(e => {
              console.log(e);
+             if(e.code=='ERR_BAD_RESPONSE')
+                      setShow(true)    
+                      setDocInvalido("cnpj")
            });     
            
      if(props.personType=="---"){
@@ -177,8 +187,8 @@ const LocaisList = (props) => {
           });         
      }
     
-
-      console.log(response);//imprime pessoa atualizada
+//depois de fazer o update
+      console.log(response);//imprime pessoa/cliente atualizada
       props.changeVoSubmit();
     })
     .catch(e => {
@@ -276,18 +286,22 @@ const LocaisList = (props) => {
               className="rounded me-2"
               alt=""
             />
-            <strong className="me-auto">Cpf inválido</strong>
+            <strong className="me-auto">{docInvalido} inválido</strong>
           </Toast.Header>
-          <Toast.Body>O cliente foi salvo sem cpf</Toast.Body>
+          <Toast.Body>Insira um {docInvalido} válido</Toast.Body>
         </Toast></ToastContainer>
-        <div align= "left">
-          <br/>
-          <button onClick={props.pessoa.cod_pessoa?udpateCliente :saveCliente} className="btn btn-success" style={{ marginLeft:"55rem", position: "absolute", marginTop:"2.4rem"}}>
-            {props.pessoa.cod_pessoa? "Salvar" : "Salvar"}
-          </button>
-          <button onClick={volta} className="btn btn-danger" style={{marginTop:"2.4rem"}}>
+        <div style={{position:"absolute",display:"flex", gap:"50em", marginTop:"5.5rem"}}>
+
+          <div>          
+          <button onClick={volta} className="btn btn-danger">
               Voltar 
             </button>
+          </div>
+          <div>
+          <button onClick={props.pessoa.cod_pessoa?udpateCliente :saveCliente} className="btn btn-success" >
+            {props.pessoa.cod_pessoa? "Salvar" : "Salvar"}
+          </button>
+            </div>
         </div>
   </div>
   );
