@@ -13,12 +13,13 @@ import Button from 'react-bootstrap/Button';
 import Modal from 'react-bootstrap/Modal';
 import AddOrdem from './AddOrdem';
 import { getDropdownMenuPlacement } from "react-bootstrap/esm/DropdownMenu";
+
 library.add(faPenToSquare, faTrashCan, faPlus);
 
 const OrdemList = (props) => {
     const navigate = useNavigate();
   const [ordens, setOrdens] = useState([]);
-
+  const [submitted, setSubmitted] = useState(false)
   const ordensRef = useRef(); //persiste entre renders ao mudar paginacao, caixa de etxto ou qqr
   ordensRef.current = ordens; //lista inicial de clientes é mantida
   const [page, setPage] = useState(1); //inicia na pagina 1
@@ -260,6 +261,7 @@ const OrdemList = (props) => {
       .catch(e => {
         console.log(e);
       });
+      setSubmitted(true)
   };
 const updateOrdem = () =>{
   //faz o Put
@@ -280,6 +282,7 @@ console.log(response)
   .catch(e => {
     console.log(e);
   });
+  setSubmitted(true)
 }
 
   return (
@@ -349,7 +352,7 @@ console.log(response)
           <Modal.Title>Cadastro de Ordens</Modal.Title>
         </Modal.Header>
         <Modal.Body>
-         <AddOrdem ordem={ordem} veiculo={props.veiculo} handleInputChange = {handleInputChange} criada={ordemCriada} />
+         <AddOrdem ordem={ordem} veiculo={props.veiculo} handleInputChange = {handleInputChange} criada={ordemCriada} submitted={submitted} setSubmitted={setSubmitted}/>
         </Modal.Body>
         <Modal.Footer>
           <Button variant="secondary" onClick={handleClose}>

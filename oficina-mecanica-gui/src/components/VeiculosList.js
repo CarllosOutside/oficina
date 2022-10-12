@@ -236,7 +236,7 @@ const getVeiculo = (placa) =>{
     ],
     []
   );
-
+const [submitted, setSubmitted] = useState(false)
   //Varias funcoes que recebem dados da tabela
   const {
     getTableProps,
@@ -262,6 +262,7 @@ const getVeiculo = (placa) =>{
     
 const [veiculo, setVeiculo] = useState(initialVeiculoState);
 const [veiculoCriado, setVeiculoCriado] = useState(false);
+
   const saveVeiculo= () => {
     //faz o Post
     VeiculoService.create(veiculo.placa, id) 
@@ -278,6 +279,7 @@ const [veiculoCriado, setVeiculoCriado] = useState(false);
         retrieveVeiculos(props.codCliente);
         setVeiculoCriado(true)
  console.log(response)
+ setSubmitted(true)
     })
       .catch(e => {
         console.log(e);
@@ -303,6 +305,7 @@ const updateVeiculo = () =>{
     .catch(e => {
       console.log(e);
     });
+    setSubmitted(true)
   };
   const saveOrdem = () =>{}
 //ATRIBUI VALORES À JSON VEICULO EM TEMPO REAL
@@ -396,7 +399,7 @@ const handleInputChange = event => {
           <Modal.Title>Cadastro de Veículos</Modal.Title>
         </Modal.Header>
         <Modal.Body>
-         <AddVeiculo veiculo ={veiculo} handleInputChange = {handleInputChange} criado={veiculoCriado}/>
+         <AddVeiculo veiculo ={veiculo} handleInputChange = {handleInputChange} criado={veiculoCriado} submitted={submitted} setSubmitted={setSubmitted}/>
         </Modal.Body>
         <Modal.Footer>
           <Button variant="secondary" onClick={handleClose}>

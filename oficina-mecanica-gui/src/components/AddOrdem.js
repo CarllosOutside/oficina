@@ -4,7 +4,8 @@ import VeiculoService from "../Services/VeiculoService";
 import Dropdown from 'react-bootstrap/Dropdown';
 import FuncionarioService from "../Services/FuncionarioService";
 import "bootstrap/dist/css/bootstrap.min.css";
-
+import Toast from 'react-bootstrap/Toast';
+import ToastContainer from 'react-bootstrap/ToastContainer';
 const AddOrdem = (props) => {
     const {id} = useParams() //id do cliente na path variable
  const initialFunc = {codFuncionario: null}
@@ -150,6 +151,21 @@ const [teste, setTeste] =  useState(true)
           <br/>
         <br/>
         </div>
+        <ToastContainer className="p-3" position={'bottom-center'} style={{zIndex:1050}}>
+        {console.log()}
+      <Toast onClose={() => props.setSubmitted(false)} show={props.submitted} delay={3000} autohide>
+          <Toast.Header>
+            <img
+              src="holder.js/20x20?text=%20"
+              className="rounded me-2"
+              alt=""
+            />
+            <strong className="me-auto">Ordem salva</strong>
+            <small>...</small>
+          </Toast.Header>
+          <Toast.Body>ordem de serviço salva com sucesso</Toast.Body>
+        </Toast>
+        </ToastContainer>
     </div>
   );
 };
