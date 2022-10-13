@@ -11,7 +11,7 @@ import Tooltip from 'react-bootstrap/Tooltip';
 import ServicoService from "../Services/ServicoService";
 import Modal from 'react-bootstrap/Modal';
 import Button from 'react-bootstrap/Button';
-import AddVeiculo from './AddVeiculo';
+import AddServico from './AddServico';
 import OrdemList from './OrdemList';
 
 library.add(faPenToSquare, faTrashCan, faPlus);
@@ -21,14 +21,15 @@ const ServicoList = (props) => {
     const initialServicoState =
         {
         id: null,
-        codOrdem: null,
+        codOrdem: props.codOrdem,
         valorPecas: 0,
         valorServico: 0,
         descricao: ""
         }
       
   const [servico, setServico] = useState(initialServicoState);
-  
+  const codOrdemRef = useRef() //as vezes o codigo recebido pelo props é descarregado de props... queremos que persista mesmo nos intervalos entre renders
+  codOrdemRef.current = props.codOrdem;
   const [servicoCriado, setServicoCriado] = useState(false)
   const [show, setShow] = useState(false);
 
@@ -63,17 +64,15 @@ const ServicoList = (props) => {
 
   
   useEffect(() => {
-
-      retrieveServicos(props.codOrdem)
+      retrieveServicos()
   }, [page, pageSize, props]); //quando muda a pagina ou pageSize, reexecuta retrieveClientes
 
   
 ///BUSCA LISTA DE SERVICOS
-  const retrieveServicos = (codOrdem) => {
-    
+  const retrieveServicos = () => {
     const params = getRequestParams(page, pageSize); //pega parametros
 
-    ServicoService.findByOrdem(codOrdem, params)
+    ServicoService.findByOrdem(codOrdemRef.current, params)
       .then(response => {
         const { servicos, totalPages } = response.data
         setServicosList(servicos);
@@ -95,16 +94,14 @@ const ServicoList = (props) => {
     setPage(1);
   };
 
-  const refreshList = () => {
-    retrieveServicos();
-  };
+
 //DELETA UM SERVICO
   const deleteServico = (index) => {
     const id = servicosRef.current[index].id;
     ServicoService.remove(id)
       .then(response => {
-        console.log(response.data);
-        refreshList();
+        console.log(response);
+        retrieveServicos();
       })
       .catch(e => {
         console.log(e);
@@ -192,22 +189,6 @@ const getServico = (id) =>{
               
               </span>
               </div>  
-              <div className="col-sm">
-              <span onClick={() => openServico(rowIdx)}>
-                  <OverlayTrigger
-                  delay={{hide: 5 }}
-                      key={"del"}
-                      placement={"top"}
-                       overlay={
-                          <Tooltip id={`tooltip-${"del"}`}>
-                            <strong>{"Serviços"}</strong>.
-                          </Tooltip>
-                        }>  
-                      <FontAwesomeIcon icon={faClipboardList} />
-                    </OverlayTrigger>
-              
-              </span>
-              </div> 
             </div>
           );
         },
@@ -230,7 +211,7 @@ const [submitted, setSubmitted] = useState(false)
 
   const saveServico= () => {
     //faz o Post
-    ServicoService.create(servico) 
+    ServicoService.create(props.codOrdem,servico) 
       .then(response => {
         setServico({
             id: response.data.id,
@@ -239,8 +220,8 @@ const [submitted, setSubmitted] = useState(false)
             valorServico: response.data.valorServico,
             descricao: response.data.descricao
         });
-            retrieveServicos(props.codOrdem);
-            setServicoCriado(true)
+            retrieveServicos();
+            setServicoCriado(true) //seta para true, que é detectado como mudança em props por AddServico
             console.log(response)
             setSubmitted(true)
     })
@@ -322,7 +303,8 @@ const faznada = ()=>{}
           <Modal.Title>Cadastro de Servicos</Modal.Title>
         </Modal.Header>
         <Modal.Body>
-         Aqui vai a componente de cadastro de servicos
+        <AddServico servico ={servico} handleInputChange = {handleInputChange} criado={servicoCriado} submitted={submitted} setSubmitted={setSubmitted}
+        codOrdem = {props.codOrdem}/>
         </Modal.Body>
         <Modal.Footer>
           <Button variant="secondary" onClick={handleClose}>

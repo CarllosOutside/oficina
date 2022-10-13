@@ -9,8 +9,8 @@ const findByOrdem = (codOrdem, params) => {
   };
 
 
-const create = (data) => {
-  return http.post(`/servicos`, data);
+const create = (codOrdem,data) => {
+  return http.post(`/servicos/${codOrdem}`, data);
 };
 
 const remove = id => {
