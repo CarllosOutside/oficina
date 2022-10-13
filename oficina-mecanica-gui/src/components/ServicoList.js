@@ -33,6 +33,8 @@ const ServicoList = (props) => {
   const [servicoCriado, setServicoCriado] = useState(false)
   const [show, setShow] = useState(false);
 
+  ///quando fecha a componente AddServico, seta servico criado para falso, de modo que nao mostre codigo de servico em AddServico caso clique em cadastrar novo servico
+  //e tambem reseta a variavel servico, esvaziando
   const handleClose = () => {setShow(false); setServico(initialServicoState);  setServicoCriado(false)
   }
   const handleShow = () => setShow(true);
@@ -116,6 +118,7 @@ const ServicoList = (props) => {
     handleShow() 
   };
 
+  //Carrega o servico clicado pelo seu id
 const getServico = (id) =>{
   ServicoService.get(id)
       .then(response => {
@@ -209,6 +212,7 @@ const [submitted, setSubmitted] = useState(false)
     data: servicosList, //dados com accessor
   });
 
+  //salva um servico no banco
   const saveServico= () => {
     //faz o Post
     ServicoService.create(props.codOrdem,servico) 
@@ -229,7 +233,27 @@ const [submitted, setSubmitted] = useState(false)
         console.log(e);
       });
   };
-
+ ///atualiza um servico
+ const updateServico = () =>{
+  //faz o Put
+  ServicoService.update(servico.id, servico) //ao clicar num servico, a funcao getServico preenche os dados do servico 
+  .then(response => { //e a funcao handleInputChange deixa a component AddServico alterar dados do servico carregado
+    setServico({
+      id: response.data.id,
+      codOrdem: response.data.codOrdem,
+      valorPecas: response.data.valorPecas,
+      valorServico: response.data.valorServico,
+      descricao: response.data.descricao
+  });
+  retrieveServicos();//apos fazer update, atualiza lista de servicos
+  setServicoCriado(true) //mostra codigo do servico em AddServico
+console.log(response)
+})
+  .catch(e => {
+    console.log(e);
+  });
+  setSubmitted(true) //mostra o toast no AddServico
+}
 
 //ATRIBUI VALORES À JSON 
 const handleInputChange = event => {
@@ -310,7 +334,7 @@ const faznada = ()=>{}
           <Button variant="secondary" onClick={handleClose}>
             Voltar
           </Button>
-          <Button variant="primary" onClick={servicoCriado?faznada: saveServico}>
+          <Button variant="primary" onClick={servicoCriado?updateServico: saveServico}>
             Salvar
           </Button>
         </Modal.Footer>

@@ -13,7 +13,7 @@ import Button from 'react-bootstrap/Button';
 import Modal from 'react-bootstrap/Modal';
 import AddOrdem from './AddOrdem';
 import { getDropdownMenuPlacement } from "react-bootstrap/esm/DropdownMenu";
-
+import ServicoService from  "../Services/ServicoService";
 library.add(faPenToSquare, faTrashCan, faPlus);
 
 const OrdemList = (props) => {
@@ -26,6 +26,7 @@ const OrdemList = (props) => {
   const [count, setCount] = useState(0); 
   const [pageSize, setPageSize] = useState(3); //3 itens por pag
   const pageSizes = [3, 6, 9]; //itens por pagina opcoes
+  const [ajuste, setAjuste] = useState(false)
   const initialOrdemState =
     {
         placa: "",
@@ -68,28 +69,44 @@ const OrdemList = (props) => {
     retrieveOrdens();
   }, [page, pageSize, props.veiculo? props.veiculo: props.funcionario]); //quando muda a pagina ou pageSize, reexecuta retrieveClientes
 
-  
+  useEffect(() =>{
+
+  },[ordens, ajuste])
 
   const retrieveOrdens = () => {
     const params = getRequestParams(page, pageSize); //pega parametros
 //acha ordens pertencentes a um veiculo
-    if(props.veiculo)
-    console.log(props.veiculo)
+    if(props.veiculo){
+     // console.log(props.veiculo)
         OrdemService.findByPlaca(props.veiculo.placa, params)
             .then(response => {
-            const { ordens, totalPages } = response.data
-            setOrdens(ordens);
-             setCount(totalPages);
-        if(response.status ==204)
-         setOrdens([]);
-             console.log(response.data);
+               const ordensGet = response.data.ordens
+               const totalPages = response.data.totalPages
+              //Busca valores em peças e mao de obra para cada ordem da lista
+               ordensGet.map(ord => { //mapeia itens da lista
+                ServicoService.getValores(ord.id) //get valores para item
+                  .then(responseV =>{
+                    const {valorTPecas, valorTServicos} = responseV.data;
+                    ord.valorTotalPecas = valorTPecas //atualiza valores item
+                    ord.valorTotalServicos = valorTServicos
+                   })
+                   .catch(e => {
+                    console.log(e);
+                   });
+                 return ord; //retorna item atualizado
+                })
+               setOrdens(ordensGet);
+               setCount(totalPages);
+             if(response.status ==204)
+              setOrdens([]);
+       console.log("ordens com valores: ", ordens);
       })
       .catch(e => {
         console.log(e);
       });
-
+    }
 //acha ordens pertencentes a um funcionario
-      if(props.funcionario)
+      if(props.funcionario){
         OrdemService.findByPlaca(props.funcionario.cod_funcionario, params)
             .then(response => {
             const { ordens, totalPages } = response.data
@@ -101,7 +118,8 @@ const OrdemList = (props) => {
       })
       .catch(e => {
         console.log(e);
-      }); 
+      });}
+      
   };
   const handlePageChange = (event, value) => {
     setPage(value);
@@ -144,6 +162,8 @@ const OrdemList = (props) => {
         .catch(e => {
           console.log(e);
         });
+
+
   }
   //abre ordem clicada
   const openOrdem = (rowIndex) => {
@@ -169,10 +189,31 @@ const OrdemList = (props) => {
         accessor: "placa",
       },
       {
+        Header: "Mão de Obra",
+        accessor: "valorTotalServicos",
+        Cell: (props) =>{
+          return(
+          <div>{props.rows[props.row.id].original.valorTotalServicos}</div>
+          )
+        } 
+      },
+      {
+        Header: "Peças",
+        accessor: "valorTotalPecas", 
+        Cell: (props) =>{ //props tem uma lista de rows -> cada row tem um indice -> o campo original contem valores
+          console.log(props.rows[props.row.id], " ---- ", props.rows[props.row.id].original.valorTotalPecas ) 
+          setAjuste(!ajuste)
+          return(
+          <div>{props.rows[props.row.id].original.valorTotalPecas}</div>
+          )
+        } 
+      },
+      {
         Header: " ",
         accessor: "actions",
         Cell: (props) => {
-          const rowIdx = props.row.id; //recebe o props de um elemento -> recebe o indice da linha
+         // console.log(props)
+          const rowIdx = props.row.id; //recebe o props de um elemento -> recebe o indice da linha 
           return (
             <div className="row" align="center">
             <div className="col-sm">
@@ -336,8 +377,11 @@ console.log(response)
               return (
                 <tr {...row.getRowProps()}>
                   {row.cells.map((cell) => {
+                   // console.log("celula: ", cell.column.Header, "   -- ", cell.value, " ---", ordens)
                     return (
-                      <td {...cell.getCellProps()}>{cell.render("Cell")}</td>
+                      <td {...cell.getCellProps()}>
+                         {cell.render("Cell")} 
+                      </td>
                     );
                   })}
                 </tr>

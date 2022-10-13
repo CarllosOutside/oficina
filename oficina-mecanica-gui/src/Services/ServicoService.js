@@ -17,12 +17,21 @@ const remove = id => {
   return http.delete(`/servico/${id}`);
 };
 
+const update = (id,data) => {
+  return http.put(`/servicos/${id}`, data);
+};
+
+const getValores = id =>{
+  return http.get(`/ordem/${id}/valores`);
+}
 
 const ServicoService = {
   get,
   create,
   remove,
-  findByOrdem
+  findByOrdem,
+  update,
+  getValores
 };
 
 export default ServicoService;
