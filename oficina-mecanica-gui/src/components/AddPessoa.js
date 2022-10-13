@@ -202,7 +202,7 @@ const changeDocumento = (event)=>{
             <LocaisList personType = {tipo} documento ={documento} pessoa ={pessoa} changeCidade = {changeCidade}  changeVoSubmit={changeParentSubmit}  operacao={props.cliente? 1:0}/>
         </div>
         {(props.cliente && props.cliente.cod_cliente != null)?
-        <div style={{marginLeft:"22rem"}}>
+        <div style={{marginLeft:"15rem"}}>
           Veículos do cliente: 
           <span onClick={() => setLgShow(true)} style={{margin: "1rem"}}>
                   <OverlayTrigger

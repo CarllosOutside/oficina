@@ -1,34 +1,54 @@
 import React, { useState, useEffect, useMemo, useRef } from "react";
 import ClienteService from "../Services/ClienteService";
-import { Link, Route,useNavigate } from "react-router-dom";
+import { Link, Route,useNavigate, useParams } from "react-router-dom";
 import Pagination from "@material-ui/lab/Pagination";
 import { useTable } from "react-table";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { library } from "@fortawesome/fontawesome-svg-core";
-import { faPenToSquare, faTrashCan, faPlus } from "@fortawesome/free-solid-svg-icons";
+import { faPenToSquare, faTrashCan, faPlus, faClipboardList } from "@fortawesome/free-solid-svg-icons";
 import OverlayTrigger from 'react-bootstrap/OverlayTrigger';
 import Tooltip from 'react-bootstrap/Tooltip';
+import ServicoService from "../Services/ServicoService";
+import Modal from 'react-bootstrap/Modal';
+import Button from 'react-bootstrap/Button';
+import AddVeiculo from './AddVeiculo';
+import OrdemList from './OrdemList';
 
 library.add(faPenToSquare, faTrashCan, faPlus);
 
-const ClienteList = (props) => {
-    const navigate = useNavigate();
-  const [clientes, setClientes] = useState([]);
-  /*const [currentCLiente, setCurrentCliente] = useState(null);
-  const [currentIndex, setCurrentIndex] = useState(-1);*/
-  const [searchNome, setSearchNome] = useState("");
-  const clientesRef = useRef(); //persiste entre renders ao mudar paginacao, caixa de etxto ou qqr
-  clientesRef.current = clientes; //lista inicial de clientes é mantida
+const ServicoList = (props) => {
+
+    const initialServicoState =
+        {
+        id: null,
+        codOrdem: null,
+        valorPecas: 0,
+        valorServico: 0,
+        descricao: ""
+        }
+      
+  const [servico, setServico] = useState(initialServicoState);
+  
+  const [servicoCriado, setServicoCriado] = useState(false)
+  const [show, setShow] = useState(false);
+
+  const handleClose = () => {setShow(false); setServico(initialServicoState);  setServicoCriado(false)
+  }
+  const handleShow = () => setShow(true);
+
+  const navigate = useNavigate()
+
+  const [servicosList, setServicosList] = useState([])
+  const servicosRef = useRef(); //persiste entre renders ao mudar paginacao, caixa de etxto ou qqr
+  servicosRef.current = servicosList; //lista inicial de clientes é mantida
+
   const [page, setPage] = useState(1); //inicia na pagina 1
   const [count, setCount] = useState(0); 
   const [pageSize, setPageSize] = useState(3); //3 itens por pag
   const pageSizes = [3, 6, 9]; //itens por pagina opcoes
-  const getRequestParams = (searchNome, page, pageSize) => { //parametros para Api
+  
+  const getRequestParams = (page, pageSize) => { //parametros para Api  
     let params = {};
-
-    if (searchNome) { //se houver SearchNome, se torna parametro
-      params["nome"] = searchNome;
-    }
 
     if (page) {
       params["page"] = page - 1;
@@ -38,33 +58,35 @@ const ClienteList = (props) => {
       params["size"] = pageSize;
     }
 
-    return params;
+    return params; 
   };
 
   
   useEffect(() => {
-    retrieveClientes();
-  }, [page, pageSize]); //quando muda a pagina ou pageSize, reexecuta retrieveClientes
+
+      retrieveServicos(props.codOrdem)
+  }, [page, pageSize, props]); //quando muda a pagina ou pageSize, reexecuta retrieveClientes
 
   
+///BUSCA LISTA DE SERVICOS
+  const retrieveServicos = (codOrdem) => {
+    
+    const params = getRequestParams(page, pageSize); //pega parametros
 
-  const retrieveClientes = () => {
-    const params = getRequestParams(searchNome, page, pageSize); //pega parametros
-
-    ClienteService.getAll(params)
+    ServicoService.findByOrdem(codOrdem, params)
       .then(response => {
-        const { clientes, totalPages } = response.data
-        setClientes(clientes);
+        const { servicos, totalPages } = response.data
+        setServicosList(servicos);
         setCount(totalPages);
-
        if(response.status ==204)
-           setClientes([])
+            setServicosList([]);
         console.log(response.data);
       })
       .catch(e => {
         console.log(e);
       });
   };
+  //PAGINACAO
   const handlePageChange = (event, value) => {
     setPage(value);
   };
@@ -72,24 +94,14 @@ const ClienteList = (props) => {
     setPageSize(event.target.value);
     setPage(1);
   };
-  //sera executado quando o nome SearchNome for preenchido
-  const findByNome= () => {
-    setPage(1);
-    retrieveClientes(); //O nome se torna um parametro
-  };
+
   const refreshList = () => {
-    retrieveClientes();
-    //setCurrentCliente(null);
-   // setCurrentIndex(-1);
+    retrieveServicos();
   };
-
-  /*const setActiveCliente = (cliente, index) => {
-    setCurrentCliente(cliente);
-    setCurrentIndex(index);
-  };*/
-
-  const removeAllClientes = () => {
-    ClienteService.removeAll()
+//DELETA UM SERVICO
+  const deleteServico = (index) => {
+    const id = servicosRef.current[index].id;
+    ServicoService.remove(id)
       .then(response => {
         console.log(response.data);
         refreshList();
@@ -98,43 +110,48 @@ const ClienteList = (props) => {
         console.log(e);
       });
   };
-  const onChangeSearchNome = (e) => {
-    const searchNome = e.target.value;
-    setSearchNome(searchNome);
+
+  //ABRE MODAL DE EDICAO/CRIACAO DE SERVICO
+  const openServico = (rowIndex) => { 
+    const id = servicosRef.current[rowIndex].id; 
+    getServico(id) 
+    setServicoCriado(true) 
+    handleShow() 
   };
-  const deleteCliente = (id) => {
-    const codcli = clientesRef.current[id].cod_cliente;
-    ClienteService.remove(codcli)
+
+const getServico = (id) =>{
+  ServicoService.get(id)
       .then(response => {
-        console.log(response.data);
-        refreshList();
+        setServico({
+          id: response.data.id,
+          codOrdem: response.data.codOrdem,
+          valorPecas: response.data.valorPecas,
+          valorServico: response.data.valorServico,
+          descricao: response.data.descricao
+      });
       })
       .catch(e => {
         console.log(e);
       });
-  };
-const telaCadastro = ()=>{
-  navigate("/add")
 }
-  const openCliente = (rowIndex) => {
-    const id = clientesRef.current[rowIndex].cod_cliente;
-    navigate("/clientes/edit/" + id);
-  };
-
   //DEFINICAO TABELA
   const columns = useMemo(
     () => [
       {
-        Header: "Nome",
-        accessor: "pessoa.nome",
+        Header: "Codigo de Serviço",
+        accessor: "id",
       },
       {
-        Header: "Telefone",
-        accessor: "pessoa.telefone",
+        Header: "Valor em peças",
+        accessor: "valorPecas",
       },
       {
-        Header: "Cidade",
-        accessor: "pessoa.cidade.name",
+        Header: "Mão de obra",
+        accessor: "valorServico",
+      },
+      {
+        Header: "Descricao",
+        accessor: "descricao",
       },
       {
         Header: " ",
@@ -144,14 +161,14 @@ const telaCadastro = ()=>{
           return (
             <div className="row" align="center">
             <div className="col-sm">
-              <span onClick={() => openCliente(rowIdx)}> {/**rowIdx é o indice do cliente na lista clientes */}
+              <span onClick={() => openServico(rowIdx)}> {/**rowIdx é o indice do cliente na lista clientes */}
               <OverlayTrigger
                       key={"ed"}
                       delay={{hide: 5 }}
                       placement={"top"}
                        overlay={
                           <Tooltip id={`tooltip-${"ed"}`}>
-                            <strong>{"editar cliente"}</strong>.
+                            <strong>{"editar serviço"}</strong>.
                           </Tooltip>
                         }>  
                       <FontAwesomeIcon icon="fa-solid fa-pen-to-square" />
@@ -160,14 +177,14 @@ const telaCadastro = ()=>{
               </span>
             </div>
             <div className="col-sm">
-              <span onClick={() => deleteCliente(rowIdx)}>
+              <span onClick={() => deleteServico(rowIdx)}>
                   <OverlayTrigger
                   delay={{hide: 5 }}
                       key={"del"}
                       placement={"top"}
                        overlay={
                           <Tooltip id={`tooltip-${"del"}`}>
-                            <strong>{"deletar cliente"}</strong>.
+                            <strong>{"deletar serviço"}</strong>.
                           </Tooltip>
                         }>  
                       <FontAwesomeIcon icon="fa-solid fa-trash-can" />
@@ -176,18 +193,19 @@ const telaCadastro = ()=>{
               </span>
               </div>  
               <div className="col-sm">
-              <span onClick={() => navigate("/add")}>
-              <OverlayTrigger
-              delay={{hide: 5 }}
-                      key={"cri"}
+              <span onClick={() => openServico(rowIdx)}>
+                  <OverlayTrigger
+                  delay={{hide: 5 }}
+                      key={"del"}
                       placement={"top"}
                        overlay={
-                          <Tooltip id={`tooltip-${"cri"}`}>
-                            <strong>{"novo cliente"}</strong>.
+                          <Tooltip id={`tooltip-${"del"}`}>
+                            <strong>{"Serviços"}</strong>.
                           </Tooltip>
                         }>  
-                      <FontAwesomeIcon icon="fa-solid fa-plus" />
+                      <FontAwesomeIcon icon={faClipboardList} />
                     </OverlayTrigger>
+              
               </span>
               </div> 
             </div>
@@ -197,7 +215,7 @@ const telaCadastro = ()=>{
     ],
     []
   );
-
+const [submitted, setSubmitted] = useState(false)
   //Varias funcoes que recebem dados da tabela
   const {
     getTableProps,
@@ -207,33 +225,42 @@ const telaCadastro = ()=>{
     prepareRow,
   } = useTable({ //tabela usada
     columns, //colunas definidas acima
-    data: clientes, //dados com acessor
+    data: servicosList, //dados com accessor
   });
 
+  const saveServico= () => {
+    //faz o Post
+    ServicoService.create(servico) 
+      .then(response => {
+        setServico({
+            id: response.data.id,
+            codOrdem: response.data.codOrdem,
+            valorPecas: response.data.valorPecas,
+            valorServico: response.data.valorServico,
+            descricao: response.data.descricao
+        });
+            retrieveServicos(props.codOrdem);
+            setServicoCriado(true)
+            console.log(response)
+            setSubmitted(true)
+    })
+      .catch(e => {
+        console.log(e);
+      });
+  };
+
+
+//ATRIBUI VALORES À JSON 
+const handleInputChange = event => {
+  const { name, value } = event.target;
+  setServico({ ...servico, [name]: value });
+};
+
+const faznada = ()=>{}
+
   return (
-    <div className="list row" style={{paddingLeft: "10rem"}}>
-      <h3 align="center">Clientes</h3><br/><br/><br/><br/>
-      <h4>Procurar Cliente</h4>
-      <div className="col-md-8">
-        <div className="input-group mb-3">
-          <input
-            type="text"
-            className="form-control"
-            placeholder="Nome do cliente"
-            value={searchNome}
-            onChange={onChangeSearchNome}
-          />
-          <div className="input-group-append">
-            <button
-              className="btn btn-outline-secondary"
-              type="button"
-              onClick={findByNome}
-            >
-              Buscar
-            </button>
-          </div>
-        </div>
-      </div>
+    <div className="list row" style={{paddingLeft: "0rem"}}>
+      <h3 align="center">Serviços</h3>
       <div className="col-md-12 list">
         {/**Itens p/ pg */}
       {"Itens por página: "} {/**handlePageSize atualiza pageSize que dispara nova busca na api pelo useEffect */}
@@ -245,20 +272,19 @@ const telaCadastro = ()=>{
             ))}
           </select>
           {/**Paginacao -> indice das paginas*/}
-          <div style={{display:"flex", gap:"40rem"}}>
-          
           <Pagination
             className="my-3"
-            count={count} //contem a qtd total de paginas(paginas selecionaveis)
-            page={page} //ao mudar este valor, o indice(pagina selecionada) muda
+            count={count} //contem a qtd total de paginas
+            page={page} //ao mudar este valor, o indice muda
             siblingCount={1}
             boundaryCount={1}
             variant="outlined"
             shape="rounded"
             onChange={handlePageChange} //altera a pagina(indice) e dispara nova busca na api
           />
-          <button onClick={telaCadastro} className="btn btn-primary" style={{height:"40px"}}>Cadastrar cliente</button>
-          </div>
+          <Button variant="primary" onClick={handleShow}>
+        Cadastrar Servico
+      </Button>
         <table
           className="table table-striped table-bordered"
           {...getTableProps()}
@@ -290,8 +316,25 @@ const telaCadastro = ()=>{
           </tbody>
         </table>
       </div>
+
+      <Modal show={show} onHide={handleClose}>
+        <Modal.Header closeButton>
+          <Modal.Title>Cadastro de Servicos</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+         Aqui vai a componente de cadastro de servicos
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={handleClose}>
+            Voltar
+          </Button>
+          <Button variant="primary" onClick={servicoCriado?faznada: saveServico}>
+            Salvar
+          </Button>
+        </Modal.Footer>
+      </Modal>
     </div>
   );
 };
 
-export default ClienteList;
+export default ServicoList;

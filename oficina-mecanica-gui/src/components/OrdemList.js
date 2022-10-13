@@ -139,6 +139,7 @@ const OrdemList = (props) => {
             valorTotalServicos: response.data.valorTotalServicos,
             valorTotalPecas: response.data.valorTotalPecas
             });
+           // console.log(response.data)
         })
         .catch(e => {
           console.log(e);
@@ -244,7 +245,7 @@ const OrdemList = (props) => {
   });
   const saveOrdem= () => {
     //faz o Post
-    OrdemService.create(ordem.codFuncionario,ordem.placa, ordem.dataAbertura) 
+    OrdemService.create(ordem.codFuncionario,props.veiculo.placa, ordem.dataAbertura) 
       .then(response => {
         setOrdem({
             id: response.data.id,

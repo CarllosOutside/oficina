@@ -6,6 +6,8 @@ import FuncionarioService from "../Services/FuncionarioService";
 import "bootstrap/dist/css/bootstrap.min.css";
 import Toast from 'react-bootstrap/Toast';
 import ToastContainer from 'react-bootstrap/ToastContainer';
+import ServicoList from "./ServicoList";
+
 const AddOrdem = (props) => {
     const {id} = useParams() //id do cliente na path variable
  const initialFunc = {codFuncionario: null}
@@ -76,6 +78,7 @@ const [teste, setTeste] =  useState(true)
   return (
     <div className="submit-form">
       <div>
+      <h3 align="center">Ordem de Serviço</h3>
         {(props.criada)?  //se o veiculo ja foi criado, desabilita a funcao de escrever placa
         <div className="form-group">
             <label>Código da ordem</label>
@@ -151,8 +154,10 @@ const [teste, setTeste] =  useState(true)
           <br/>
         <br/>
         </div>
+        <br/><br/>
+        <ServicoList codOrdem={props.ordem.id}/>
         <ToastContainer className="p-3" position={'bottom-center'} style={{zIndex:1050}}>
-        {console.log()}
+
       <Toast onClose={() => props.setSubmitted(false)} show={props.submitted} delay={3000} autohide>
           <Toast.Header>
             <img

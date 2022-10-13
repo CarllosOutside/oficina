@@ -47,7 +47,9 @@ const FuncionariosList = (props) => {
     retrieveFuncionarios();
   }, [page, pageSize]); //quando muda a pagina ou pageSize, reexecuta retrieveClientes
 
-  
+  const telaCadastro = ()=>{
+    navigate("/funcionario/add")
+  }
 
   const retrieveFuncionarios = () => {
     const params = getRequestParams(searchNome, page, pageSize); //pega parametros
@@ -57,8 +59,8 @@ const FuncionariosList = (props) => {
         const { funcionarios, totalPages } = response.data
         setFuncionarios(funcionarios);
         setCount(totalPages);
-       // if(response.status ==204)
-           // navigate("/add");
+        if(response.status ==204)
+            setFuncionarios([])
         console.log(response.data);
       })
       .catch(e => {
@@ -234,6 +236,7 @@ const FuncionariosList = (props) => {
             ))}
           </select>
           {/**Paginacao -> indice das paginas*/}
+          <div style={{display:"flex", gap:"40rem"}}>
           <Pagination
             className="my-3"
             count={count} //contem a qtd total de paginas(paginas selecionaveis)
@@ -244,6 +247,8 @@ const FuncionariosList = (props) => {
             shape="rounded"
             onChange={handlePageChange} //altera a pagina(indice) e dispara nova busca na api
           />
+          <button onClick={telaCadastro} className="btn btn-primary" style={{height:"40px"}}>Cadastrar funcionario</button>
+          </div>
         <table
           className="table table-striped table-bordered"
           {...getTableProps()}
