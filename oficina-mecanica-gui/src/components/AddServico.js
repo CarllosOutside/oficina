@@ -52,7 +52,7 @@ useEffect(()=>{
           </div>
           <div className="form-group">
             <label>descricao</label>
-            <input
+            <textarea
               type="text"
               className="form-control"
               id="descricao"

@@ -8,21 +8,18 @@ import Ordens from "./components/Ordens";
 
 export const ListComponent = (props) => {
   
-  const monthNames = ["Jan", "Fev", "Mar", "Abr", "Mai", "Jun",
-  "Jul", "Ago", "Set", "Out", "Nov", "Dez"
-];
-
-const mesAtual = moment.tz("America/Sao_Paulo").format("MM");
-const anoAtual = moment.tz("America/Sao_Paulo").format("yyy");
-const [mes, setMes] = useState(monthNames[new Date().getMonth()])
+let mesAtual = moment.tz(props.dataAtual,"America/Sao_Paulo").format("MM");
+let anoAtual = moment.tz(props.dataAtual,"America/Sao_Paulo").format("yyy");
+let mes = moment.tz(props.dataAtual,"America/Sao_Paulo").format("MMM")
 //  console.log(mes)
-const [currentOrdensList, setCurrentOrdensList] = useState([])
+let [currentOrdensList, setCurrentOrdensList] = useState([])
 
-const diaAtual = moment.tz("America/Sao_Paulo").format("d"); //dia da semana (1-7) 
-const segundaAtual = moment.tz("America/Sao_Paulo").format("DD") - diaAtual + 1; //segunda feira da semana(nº dia do mes)
-const [dias, setDias] = useState([segundaAtual, segundaAtual+1, segundaAtual+2, segundaAtual+3, segundaAtual+4]) 
+let diaAtual = moment.tz(props.dataAtual,"America/Sao_Paulo").format("d"); //n-ésimo dia da semana : n in (1-7) 
+let segundaAtual = moment.tz(props.dataAtual,"America/Sao_Paulo").format("DD") - diaAtual + 1; //segunda feira da semana(nº dia do mes : 1-30)
+//dias do calendario de acordo com a segunda-feira
+let dias = [segundaAtual, segundaAtual+1, segundaAtual+2, segundaAtual+3, segundaAtual+4]
 
-  const [categories, setCategories] = useState([
+  let [categories, setCategories] = useState([
     {
       id: anoAtual+"-"+mesAtual+"-"+dias[0],
       name: "seg.",
@@ -55,18 +52,22 @@ const [dias, setDias] = useState([segundaAtual, segundaAtual+1, segundaAtual+2, 
     }
   ]);
 
+  const updateCategories = () =>{
+    
+  }
 //carrega todas as ordens do corrente mes 
 useEffect(() => {
-  console.log("lista carregada do baco")
+ //console.log(categories)
 retrieveOrdens()
-}, []); 
+}, [props]); 
+
 //adiciona ordens à current ordens lista
   const retrieveOrdens = () =>{
     OrdemService.findByAnoMes(anoAtual, mesAtual)
     .then(
       response => {
         setCurrentOrdensList(response.data)
-       // console.log(response.data)
+       //console.log(response.data)
       }
     ).catch(e => {
       console.log(e);
@@ -76,10 +77,11 @@ retrieveOrdens()
   //função mapeia cada ordem da lista buscada na Api à sua categoria
   const mapeiaOrdensCategorias = () =>{ 
     currentOrdensList.forEach(ord =>{ //para cada ordem do mes  
-    //so executa 1 set
+    //executa setcateg
       setCategories(currentCategories => //current = lista pega da api 
           //para cada categoria, atualiza se necessario.
-          currentCategories.map(categ => { //para cada categoria(dia semana)
+          currentCategories.map((categ,index) => { //para cada categoria(dia semana)
+            categ.id = anoAtual+"-"+mesAtual+"-"+(dias[index]>9?dias[index]:("0"+dias[index])) //atualiza id das categorias
             if (categ.id === ord.dataAbertura) { //se a data da categoria for a mesma da ordem
               categ.items.indexOf(ord)==-1? categ.items.push(ord) : //adiciona ordem à categoria correspondente, se ela ainda nao estiver la
               console.log(categ)
@@ -94,8 +96,15 @@ retrieveOrdens()
   }
   //após carregar a lista de ordens, faz o mapeamento, inserindo-as no drop
   useMemo(()=>{
+    //antes de mapear a lista às categorias, esvazia os itens nas categorias
+    setCategories(currentCategories => 
+          currentCategories.map((categ) => { 
+            categ.items = []
+            return categ; 
+          }),      
+      );
     mapeiaOrdensCategorias()  
-    console.log(currentOrdensList) 
+    console.log("lista atual(ordens do mes):", currentOrdensList) 
   },[currentOrdensList])
   
   const [updatableOrdem, setUpdatableOrdem] = useState()
