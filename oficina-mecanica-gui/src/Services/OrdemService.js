@@ -17,7 +17,7 @@ const findByPlaca = (placa, params) => {
   };
 
 const create = (codFuncionario, placa, dataA) => {
-  console.log("placa ",placa)
+  //console.log("placa ",placa)
   return http.post(`/ordens/${codFuncionario}/${placa}?dataAbertura=${dataA}`);
 };
 

@@ -5,49 +5,58 @@ import { Cartao } from "./cartao";
 import moment from "moment-timezone";
 import OrdemService from "./Services/OrdemService";
 import Ordens from "./components/Ordens";
-
+import ServicoService from "./Services/ServicoService";
 export const ListComponent = (props) => {
   
 let mesAtual = moment.tz(props.dataAtual,"America/Sao_Paulo").format("MM");
 let anoAtual = moment.tz(props.dataAtual,"America/Sao_Paulo").format("yyy");
 let mes = moment.tz(props.dataAtual,"America/Sao_Paulo").format("MMM")
+let diasMax = moment.tz(props.dataAtual,"America/Sao_Paulo").daysInMonth()
+console.log(diasMax)
 //  console.log(mes)
 let [currentOrdensList, setCurrentOrdensList] = useState([])
 
 let diaAtual = moment.tz(props.dataAtual,"America/Sao_Paulo").format("d"); //n-ésimo dia da semana : n in (1-7) 
 let segundaAtual = moment.tz(props.dataAtual,"America/Sao_Paulo").format("DD") - diaAtual + 1; //segunda feira da semana(nº dia do mes : 1-30)
 //dias do calendario de acordo com a segunda-feira
+
 let dias = [segundaAtual, segundaAtual+1, segundaAtual+2, segundaAtual+3, segundaAtual+4]
+console.log(dias)
 
   let [categories, setCategories] = useState([
     {
       id: anoAtual+"-"+mesAtual+"-"+dias[0],
       name: "seg.",
       key: "segunda",
+      info: dias[0],
       items: []
     },
     {
       id: anoAtual+"-"+mesAtual+"-"+dias[1],
       name: "ter.",
       key: "terca",
+      info: dias[1],
       items: []
     },
     {
       id: anoAtual+"-"+mesAtual+"-"+dias[2],
       name: "qua.",
       key: "quarta",
+      info: dias[2],
       items: []
     },
     {
       id: anoAtual+"-"+mesAtual+"-"+dias[3],
       name: "qui.",
       key: "quinta",
+      info: dias[3],
       items: []
     },
     {
       id: anoAtual+"-"+mesAtual+"-"+dias[4],
       name: "sex.",
       key: "sexta",
+      info: dias[4],
       items: []
     }
   ]);
@@ -63,13 +72,26 @@ retrieveOrdens()
 
 //adiciona ordens à current ordens lista
   const retrieveOrdens = () =>{
+    console.log("retrieving ordens")
     OrdemService.findByAnoMes(anoAtual, mesAtual)
     .then(
       response => {
         setCurrentOrdensList(response.data)
        //console.log(response.data)
+       return response.data
       }
-    ).catch(e => {
+    )
+    .then(lista =>{ //pega a lista de ordens
+     // console.log("lista de ordens: ",lista)
+      lista.map((ord) =>{ //p cada ordem
+        ServicoService.getValores(ord.id) //pega seus valores
+        .then(response2 =>{ 
+          ord.valorTotalPecas=response2.data.valorTPecas //seta valores
+          ord.valorTotalServicos = response2.data.valorTServicos  
+        })  
+      })
+    })
+    .catch(e => {
       console.log(e);
     });
   }
@@ -81,10 +103,12 @@ retrieveOrdens()
       setCategories(currentCategories => //current = lista pega da api 
           //para cada categoria, atualiza se necessario.
           currentCategories.map((categ,index) => { //para cada categoria(dia semana)
-            categ.id = anoAtual+"-"+mesAtual+"-"+(dias[index]>9?dias[index]:("0"+dias[index])) //atualiza id das categorias
+            categ.id = anoAtual+"-"+mesAtual+"-"+(dias[index]>9?dias[index]:("0"+dias[index])) //atualiza id das categorias ajusta dia, ex: 5 para 05
+            categ.info = (dias[index]) //recebe dia
+            //console.log(categ)
             if (categ.id === ord.dataAbertura) { //se a data da categoria for a mesma da ordem
               categ.items.indexOf(ord)==-1? categ.items.push(ord) : //adiciona ordem à categoria correspondente, se ela ainda nao estiver la
-              console.log(categ)
+              console.log()
               return categ; //retorna categ com ordem adiconada
             }
             //se nao bater as datas retorna categ old deixando a categoria como esta
@@ -92,7 +116,7 @@ retrieveOrdens()
           }),      
       );
     });    
-      console.log("normal  ", categories)
+      //console.log("lista de categorias atual:  ", categories)
   }
   //após carregar a lista de ordens, faz o mapeamento, inserindo-as no drop
   useMemo(()=>{
@@ -104,8 +128,8 @@ retrieveOrdens()
           }),      
       );
     mapeiaOrdensCategorias()  
-    console.log("lista atual(ordens do mes):", currentOrdensList) 
-  },[currentOrdensList])
+    //console.log("lista atual(ordens do mes):", currentOrdensList) 
+  },[currentOrdensList, props])
   
   const [updatableOrdem, setUpdatableOrdem] = useState()
 
@@ -209,6 +233,7 @@ useEffect(() => {
     <DragAndDrop onDragEnd={handleDragEnd}>
       {/**mapeia cada categoria do estado */}
       {categories.map((category, categoryIndex) => {
+        if(category.info>0 && category.info<=diasMax)
         return (
           <div className="category-container">
             <h4 className="titulo" align="center">

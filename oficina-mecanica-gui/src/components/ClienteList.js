@@ -211,7 +211,7 @@ const telaCadastro = ()=>{
   });
 
   return (
-    <div className="list row" style={{paddingLeft: "10rem"}}>
+    <div className="list row" style={{padding:"50px",width:"95%"}}>
       <h3 align="center">Clientes</h3><br/><br/><br/><br/>
       <h4>Procurar Cliente</h4>
       <div className="col-md-8">
@@ -245,8 +245,8 @@ const telaCadastro = ()=>{
             ))}
           </select>
           {/**Paginacao -> indice das paginas*/}
-          <div style={{display:"flex", gap:"40rem"}}>
-          
+          <div style={{display:"flex"}}>
+          <div style={{flex:"80%"}}>
           <Pagination
             className="my-3"
             count={count} //contem a qtd total de paginas(paginas selecionaveis)
@@ -256,8 +256,10 @@ const telaCadastro = ()=>{
             variant="outlined"
             shape="rounded"
             onChange={handlePageChange} //altera a pagina(indice) e dispara nova busca na api
-          />
-          <button onClick={telaCadastro} className="btn btn-primary" style={{height:"40px"}}>Cadastrar cliente</button>
+          /></div>
+          <div style={{flex:"20%"}}>
+          <button onClick={telaCadastro} className="btn btn-primary" style={{height:"auto"}}>Cadastrar cliente</button>
+          </div>
           </div>
         <table
           className="table table-striped table-bordered"

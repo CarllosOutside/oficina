@@ -20,10 +20,17 @@ export default function App() {
       <ListComponent />
     </div>*/
     <div>
-      <nav className="navbar navbar-expand navbar-dark bg-dark" style={{"--bs-navbar-padding-x": "0.5rem"}}>
+      <nav className="navbar navbar-expand navbar-dark bg-dark" style={{"--bs-navbar-padding-x": "0.5rem", width:"100%"}}>
         <a href="/calendario" className="navbar-brand">
           GeSMA
         </a>
+        <div className="navbar-nav mr-auto">
+          <li className="nav-item">
+            <Link to={"/calendario"} className="nav-link">
+              Ordens de Serviço
+            </Link>
+          </li>
+        </div>
         <div className="navbar-nav mr-auto">
           <li className="nav-item">
             <Link to={"/clientes"} className="nav-link">
@@ -40,10 +47,10 @@ export default function App() {
         </div>
       </nav>
 
-      <div className="container mt-3" style={{paddingRight: 0, marginLeft:0}}>
+      <div style={{paddingRight: 0, marginLeft:0}}>
         <Routes>
-          <Route path="/" element={<div className="containerTest">
-      <ListComponent />
+          <Route path="/" element={<div>
+      <Ordens />
     </div>} />
           <Route path="/calendario" element={<div>
       <Ordens />

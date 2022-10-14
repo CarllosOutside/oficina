@@ -21,8 +21,9 @@ const update = (id,data) => {
   return http.put(`/servicos/${id}`, data);
 };
 
-const getValores = id =>{
-  return http.get(`/ordem/${id}/valores`);
+
+const getValores = codOrdem =>{
+  return http.get(`/ordem/${codOrdem}/valores`);
 }
 
 const ServicoService = {

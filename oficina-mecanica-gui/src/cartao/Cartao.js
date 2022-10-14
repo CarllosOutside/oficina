@@ -7,17 +7,35 @@ import {
   CardTitle,
   CardText
 } from "reactstrap";
-import React, { useState, useEffect } from "react";
-
+import React, { useState, useEffect, useMemo } from "react";
+import Modal from 'react-bootstrap/Modal';
 import { BiChevronDown, BiChevronUp } from "react-icons/bi";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faFilePen } from "@fortawesome/free-solid-svg-icons";
+import CadastroDeOrdemCalendario from "../components/CadastroDeOrdemCalendario";
+import ServicoService from "../Services/ServicoService";
+import OverlayTrigger from 'react-bootstrap/OverlayTrigger';
+import Tooltip from 'react-bootstrap/Tooltip';
 
 export const Cartao = (props) => {
   const [collapse, setCollapse] = useState(false);
   const toggle = () => setCollapse(!collapse);
 
-  const item = props.item;
-  //console.log(item);
-  return (
+  const [item, setItem] = useState(props.item);
+ 
+  const setValores = () =>{
+    ServicoService.getValores(item.id)
+    .then(response =>{
+      setItem({...item, valorTotalPecas: response.data.valorTPecas})
+      setItem({...item, valorTotalServicos : response.data.valorTServicos})
+      console.log(response)
+    })
+  }
+  const [showOrdem, setShowOrdem] = useState(false);
+  const handleCloseOrdem = () => setShowOrdem(false);
+  const handleShowOrdem = () => setShowOrdem(true);
+ return (
+  <div>
     <Card
       className="my-2"
       color="primary"
@@ -29,9 +47,25 @@ export const Cartao = (props) => {
         margin: 0,
         border: 0
       }}
-    >
+  >
+    {console.log("render")}
       <CardHeader style={{ fontSize: "1.4vw", backgroundColor: item.plac }}>
-        Placa: {item.placa}
+        <div style={{display:"flex"}}>
+          <div style={{flex:"90%"}}>Placa: {item.placa}</div> 
+          <span onClick={handleShowOrdem} style={{flex:"10%"}}>
+               <OverlayTrigger
+                      key={"new"}
+                      delay={{hide: 5 }}
+                      placement={"top"}
+                       overlay={
+                          <Tooltip id={`tooltip-${"new"}`}>
+                            <strong>{"Detalhes da ordem"}</strong>.
+                          </Tooltip>
+                        }>  
+                      <FontAwesomeIcon icon={faFilePen} />
+                    </OverlayTrigger>
+          </span>
+        </div>
       </CardHeader>
       <CardBody style={{ backgroundColor: item.bcolor }}>
         <Collapse isOpen={collapse}>
@@ -60,5 +94,19 @@ export const Cartao = (props) => {
         </div>
       </CardBody>
     </Card>
+
+    <Modal show={showOrdem} onHide={handleCloseOrdem}>
+        <Modal.Header closeButton>
+        <Modal.Title>Cadastrar uma ordem</Modal.Title>    
+        </Modal.Header>
+        <Modal.Body> <CadastroDeOrdemCalendario ordemAberta={item}/></Modal.Body>
+        <Modal.Footer>
+         <Button variant="danger" onClick={handleCloseOrdem} style={{position:"absolute", left:"0px", bottom:"1px"}}>
+            Voltar
+          </Button>
+<div></div><br/>
+        </Modal.Footer>
+      </Modal>
+    </div>
   );
 };

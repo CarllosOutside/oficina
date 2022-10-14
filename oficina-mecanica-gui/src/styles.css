@@ -25,7 +25,7 @@
 }
 
 .droppable {
-  width: 18vw; 
+  width: 100%; 
   height: 100%; /*ocupa 100% do category container*/
 }
 
@@ -33,7 +33,7 @@
   background: #d1e3e7;
   background: rgba(152, 236, 232, 0.55);
   height: 100%;
-  width: 18vw;
+  width: 100%;
 }
 .titulo {
   width: 100%;
