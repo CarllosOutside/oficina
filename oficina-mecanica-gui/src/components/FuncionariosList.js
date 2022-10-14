@@ -202,8 +202,9 @@ const FuncionariosList = (props) => {
   });
 
   return (
-    <div className="list row" style={{width:"95%", padding:"50px"}}>
-      <h3 align="center">Funcionarios</h3><br/><br/><br/><br/>
+    <div className="list row" style={{paddingLeft:"50px", paddingTop:"30px",width:"95%"}}>
+      <h3 align="center">Funcionarios</h3><br/><br/><br/>
+      <hr/>
       <h4>Procurar Funcionario</h4>
       <div className="col-md-8">
         <div className="input-group mb-3">

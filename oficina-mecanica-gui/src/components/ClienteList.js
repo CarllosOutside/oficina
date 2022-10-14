@@ -211,8 +211,9 @@ const telaCadastro = ()=>{
   });
 
   return (
-    <div className="list row" style={{padding:"50px",width:"95%"}}>
-      <h3 align="center">Clientes</h3><br/><br/><br/><br/>
+    <div className="list row" style={{paddingLeft:"50px", paddingTop:"30px",width:"95%"}}>
+      <h3 align="center">Clientes</h3><br/><br/><br/>
+      <hr/>
       <h4>Procurar Cliente</h4>
       <div className="col-md-8">
         <div className="input-group mb-3">
