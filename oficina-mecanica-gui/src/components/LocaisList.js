@@ -290,15 +290,15 @@ const LocaisList = (props) => {
           </Toast.Header>
           <Toast.Body>Insira um {docInvalido} válido</Toast.Body>
         </Toast></ToastContainer>
-        <div style={{position:"absolute",display:"flex", gap:"70%" , marginTop:"7rem"}}>
-
-          <div>          
+        <div style={{position:"absolute",display:"flex", marginTop:"7rem", right:"1px"}}>
+              <div style={{flex:"3%"}}></div>
+          <div style={{flex:"85%"}}>          
           <button onClick={volta} className="btn btn-danger">
               Voltar 
             </button>
           </div>
-          <div>
-          <button onClick={props.pessoa.cod_pessoa?udpateCliente :saveCliente} className="btn btn-success">
+          <div style={{flex:"8%"}}>
+          <button onClick={props.pessoa.cod_pessoa?udpateCliente :saveCliente} className="btn btn-success" >
             {props.pessoa.cod_pessoa? "Salvar" : "Salvar"}
           </button>
             </div>

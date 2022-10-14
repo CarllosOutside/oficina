@@ -109,6 +109,7 @@ const changeDocumento = (event)=>{
         <h4>Cadastro de Clientes</h4>
         :<h4>Cadastro de funcionários</h4>
       }
+      <hr/>
         {pessoa.cod_pessoa? 
         <div className="form-group">
             <label>{props.cliente? "Código do cliente" : "Código do funcionário"}</label>
