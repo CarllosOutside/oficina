@@ -236,8 +236,8 @@ const LocaisList = (props) => {
   <div className="list row">
 
     {/**container estado */}
-    <div style={{display:"flex"}}>
-    <div className="col-md-3">
+    <div style={{display:"flex", flexWrap:"wrap", padding:"5px"}}>
+    <div style={{margin:"5px"}}>
       <Dropdown isOpen={dropDownEstado} toggle={toggleEstado}>
         <DropdownToggle caret color="primary">
          {currentEstado? currentEstado.name: (props.pessoa.cidade? props.pessoa.cidade.state_id.name: "Selecione um Estado")}
@@ -257,7 +257,7 @@ const LocaisList = (props) => {
     </div>
 
     {/**container cidades */}
-    <div className="col-md-3" style={{marginLeft: "5rem"}}>
+    <div style={{margin:"5px"}}>
       <Dropdown isOpen={dropDownCidade} toggle={toggleCidade} disabled={currentEstado? false: true} >
         <DropdownToggle caret color="primary">
         {currentCidade? currentCidade.name: (props.pessoa.cidade? props.pessoa.cidade.name: "Selecione uma Cidade")}
@@ -290,7 +290,7 @@ const LocaisList = (props) => {
           </Toast.Header>
           <Toast.Body>Insira um {docInvalido} válido</Toast.Body>
         </Toast></ToastContainer>
-        <div style={{position:"absolute",display:"flex", gap:"50em", marginTop:"5.5rem"}}>
+        <div style={{position:"absolute",display:"flex", gap:"70%" , marginTop:"7rem"}}>
 
           <div>          
           <button onClick={volta} className="btn btn-danger">
@@ -298,7 +298,7 @@ const LocaisList = (props) => {
             </button>
           </div>
           <div>
-          <button onClick={props.pessoa.cod_pessoa?udpateCliente :saveCliente} className="btn btn-success" >
+          <button onClick={props.pessoa.cod_pessoa?udpateCliente :saveCliente} className="btn btn-success">
             {props.pessoa.cod_pessoa? "Salvar" : "Salvar"}
           </button>
             </div>

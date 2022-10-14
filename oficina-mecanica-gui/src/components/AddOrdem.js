@@ -151,6 +151,28 @@ const [teste, setTeste] =  useState(true)
               name="dataAbertura"
             />
           </div>
+          <div className="form-group">
+            <label>Valor em peças</label>
+            <input
+              type="text"
+              className="form-control"
+              id="valorTotalPecas"
+              value={props.ordem.valorTotalPecas}
+              disabled
+              name="valorTotalPecas"
+            />
+          </div>
+          <div className="form-group">
+            <label>Mão de Obra</label>
+            <input
+              type="text"
+              className="form-control"
+              id="valorTotalMaoObra"
+              value={props.ordem.valorTotalServicos}
+              disabled
+              name="valorTotalMaoObra"
+            />
+          </div>
           <br/>
         <br/>
         </div>

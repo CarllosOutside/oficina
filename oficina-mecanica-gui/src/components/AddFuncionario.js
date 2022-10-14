@@ -67,7 +67,7 @@ const getFuncionario = id => {
 
 
   return (
-    <div className="submit-form" style={{paddingLeft: "10rem"}}>
+    <div className="submit-form" style={{}}>
         <div>
             <Addpessoa funcionario = {funcionario} changePaiSubmit ={changeSubmitted}/>
         </div>

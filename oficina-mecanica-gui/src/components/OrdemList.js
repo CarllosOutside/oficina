@@ -26,7 +26,7 @@ const OrdemList = (props) => {
   const [count, setCount] = useState(0); 
   const [pageSize, setPageSize] = useState(3); //3 itens por pag
   const pageSizes = [3, 6, 9]; //itens por pagina opcoes
-  const [ajuste, setAjuste] = useState(false)
+
   const initialOrdemState =
     {
         placa: "",
@@ -63,64 +63,44 @@ const OrdemList = (props) => {
 
     return params;
   };
-
+const [ajuste, setAjuste] = useState(false)
 
   useEffect(() => {
     retrieveOrdens();
+    setAjuste(!ajuste)
   }, [page, pageSize, props.veiculo? props.veiculo: props.funcionario]); //quando muda a pagina ou pageSize, reexecuta retrieveClientes
 
-  useEffect(() =>{
-
-  },[ordens, ajuste])
 
   const retrieveOrdens = () => {
     const params = getRequestParams(page, pageSize); //pega parametros
 //acha ordens pertencentes a um veiculo
     if(props.veiculo){
      // console.log(props.veiculo)
-        OrdemService.findByPlaca(props.veiculo.placa, params)
-            .then(response => {
-               const ordensGet = response.data.ordens
+        OrdemService.findByPlaca(props.veiculo.placa, params)//acha lista de ordens por placa
+            .then(response => { 
+               const ordensGet = response.data.ordens //lista orndensGet
                const totalPages = response.data.totalPages
               //Busca valores em peças e mao de obra para cada ordem da lista
-               ordensGet.map(ord => { //mapeia itens da lista
-                ServicoService.getValores(ord.id) //get valores para item
+               ordensGet.map(ord => { //mapeia itens da lista(para cada ord de ordensGet)
+                ServicoService.getValores(ord.id) //get valoresP e MaoObra para o item de id
                   .then(responseV =>{
                     const {valorTPecas, valorTServicos} = responseV.data;
                     ord.valorTotalPecas = valorTPecas //atualiza valores item
-                    ord.valorTotalServicos = valorTServicos
-                   })
-                   .catch(e => {
-                    console.log(e);
-                   });
-                 return ord; //retorna item atualizado
+                    ord.valorTotalServicos = valorTServicos //seta valores de ord
+                   }) 
                 })
                setOrdens(ordensGet);
                setCount(totalPages);
              if(response.status ==204)
               setOrdens([]);
-       console.log("ordens com valores: ", ordens);
+       //console.log("ordens com valores: ", ordens);
       })
       .catch(e => {
         console.log(e);
       });
-    }
-//acha ordens pertencentes a um funcionario
-      if(props.funcionario){
-        OrdemService.findByPlaca(props.funcionario.cod_funcionario, params)
-            .then(response => {
-            const { ordens, totalPages } = response.data
-            setOrdens(ordens);
-             setCount(totalPages);
-       // if(response.status ==204)
-           // navigate("/add");
-             console.log(response.data);
-      })
-      .catch(e => {
-        console.log(e);
-      });}
-      
+    } 
   };
+
   const handlePageChange = (event, value) => {
     setPage(value);
   };
@@ -129,13 +109,8 @@ const OrdemList = (props) => {
     setPage(1);
   };
 
-  const refreshList = () => {
-    retrieveOrdens();
-  };
-
-
   const deleteOrdem = (rowIdx) => {
-    const id = ordensRef.current[rowIdx].id;
+    const id = ordensRef.current[rowIdx].id; 
     OrdemService.remove(id)
       .then(response => {
         console.log(response.data);
@@ -146,18 +121,24 @@ const OrdemList = (props) => {
       });
   };
 
+  //pega uma ordem do banco
   const getOrdem = (id) =>{
     OrdemService.get(id)
         .then(response => {
-          setOrdem({
-            id: response.data.id,
-            placa: response.data.placa,
-            codFuncionario: response.data.codFuncionario,
-            dataAbertura: response.data.dataAbertura,
-            valorTotalServicos: response.data.valorTotalServicos,
-            valorTotalPecas: response.data.valorTotalPecas
-            });
-           // console.log(response.data)
+          ServicoService.getValores(response.data.id)
+          .then(response2 =>{
+            setOrdem({
+              id: response.data.id,
+              placa: response.data.placa,
+              codFuncionario: response.data.codFuncionario,
+              dataAbertura: response.data.dataAbertura,
+              valorTotalServicos: response2.data.valorTServicos,
+              valorTotalPecas: response2.data.valorTPecas
+              });
+          })
+          .catch(e2 => {
+            console.log(e2);
+          });
         })
         .catch(e => {
           console.log(e);
@@ -187,26 +168,6 @@ const OrdemList = (props) => {
       {
         Header: "Placa",
         accessor: "placa",
-      },
-      {
-        Header: "Mão de Obra",
-        accessor: "valorTotalServicos",
-        Cell: (props) =>{
-          return(
-          <div>{props.rows[props.row.id].original.valorTotalServicos}</div>
-          )
-        } 
-      },
-      {
-        Header: "Peças",
-        accessor: "valorTotalPecas", 
-        Cell: (props) =>{ //props tem uma lista de rows -> cada row tem um indice -> o campo original contem valores
-          console.log(props.rows[props.row.id], " ---- ", props.rows[props.row.id].original.valorTotalPecas ) 
-          setAjuste(!ajuste)
-          return(
-          <div>{props.rows[props.row.id].original.valorTotalPecas}</div>
-          )
-        } 
       },
       {
         Header: " ",
@@ -269,9 +230,10 @@ const OrdemList = (props) => {
         },
       },
     ],
-    []
+    [] 
   );
 
+  const rowsPersist = useRef()
   //Varias funcoes que recebem dados da tabela
   const {
     getTableProps,
@@ -282,8 +244,9 @@ const OrdemList = (props) => {
   } = useTable({ //tabela usada
     columns, //colunas definidas acima
     data: ordens
-    , //dados com acessor
+    //dados com acessor
   });
+  
   const saveOrdem= () => {
     //faz o Post
     OrdemService.create(ordem.codFuncionario,props.veiculo.placa, ordem.dataAbertura) 
@@ -377,7 +340,7 @@ console.log(response)
               return (
                 <tr {...row.getRowProps()}>
                   {row.cells.map((cell) => {
-                   // console.log("celula: ", cell.column.Header, "   -- ", cell.value, " ---", ordens)
+                   //console.log("celula: ", cell.value)
                     return (
                       <td {...cell.getCellProps()}>
                          {cell.render("Cell")} 
