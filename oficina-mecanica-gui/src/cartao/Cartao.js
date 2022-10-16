@@ -36,7 +36,17 @@ useEffect(()=>{},[props])
     })
   }
   const [showOrdem, setShowOrdem] = useState(false);
-  const handleCloseOrdem = () => setShowOrdem(false);
+
+  const [ordemUpdated, setOrdemUpdated] = useState(false)
+  const handleCloseOrdem = () => {//ao fechar a janela de edição de ordem, recarrega as ordens
+    setShowOrdem(false); 
+
+    //recarrega ordens se serviços foram adicionados/editados/deletados
+    if(ordemUpdated){
+      setOrdemUpdated(false)
+      window.location.reload();
+    } 
+  } 
   const handleShowOrdem = () => setShowOrdem(true);
   
  return (
@@ -104,7 +114,7 @@ useEffect(()=>{},[props])
         <Modal.Header closeButton>
         <Modal.Title>Cadastrar uma ordem</Modal.Title>    
         </Modal.Header>
-        <Modal.Body> <CadastroDeOrdemCalendario ordemAberta={item} changeCrud={props.changeCrud}/></Modal.Body>
+        <Modal.Body> <CadastroDeOrdemCalendario ordemAberta={item} changeCrud={props.changeCrud} setUpdated={setOrdemUpdated}/></Modal.Body>
         <Modal.Footer>
          <Button variant="danger" onClick={handleCloseOrdem} style={{position:"absolute", left:"0px", bottom:"1px"}}>
             Voltar

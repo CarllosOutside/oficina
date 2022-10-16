@@ -312,7 +312,7 @@ useEffect(()=>{
         <br/>
         </div>
         <br/><br/>
-        {criada?<ServicoList codOrdem={ordem.id}/>:<></>}
+        {criada?<ServicoList codOrdem={ordem.id} setUpdated={props.setUpdated}/>:<></>}
         
         <ToastContainer className="p-3" position={'bottom-center'} style={{zIndex:1050}}>
 

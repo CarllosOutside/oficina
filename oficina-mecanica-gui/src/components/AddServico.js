@@ -3,10 +3,27 @@ import { useParams, useNavigate } from "react-router-dom";
 import VeiculoService from "../Services/VeiculoService";
 import Toast from 'react-bootstrap/Toast';
 import ToastContainer from 'react-bootstrap/ToastContainer';
+import CurrencyInput from 'react-currency-input';
+
 const AddServico = (props) => {
 
 useEffect(()=>{
 }, [props]) //atualiza pela props. quando o servico for criado, carrega o codigo do servico no render
+
+const faznada = () =>{}
+
+//ao mudar o valor de um campo currency
+const mudouvalor = (event, maskedvalue, floatvalue)=>{
+ //console.log(maskedvalue, "----", floatvalue)
+ //console.log(event.target.name)
+props.handleInputChange({
+  target:{
+    name: event.target.name,
+    value:floatvalue
+  }
+ })
+ //console.log(props.servico)
+}
 
   return (
     <div className="submit-form">
@@ -29,25 +46,27 @@ useEffect(()=>{
         
           <div className="form-group">
             <label>valorPecas</label>
-            <input
-              type="number"
-              className="form-control"
-              id="valorPecas"
-              required
-              value={props.servico.valorPecas}
-              onChange={props.handleInputChange}
-              name="valorPecas"
+            <CurrencyInput 
+            value={props.servico.valorPecas}
+            onChangeEvent={mudouvalor}
+            decimalSeparator="," 
+            thousandSeparator="."
+            prefix="R$"
+            className="form-control"
+            name="valorPecas"
             />
           </div>
-          <div className="form-group">
+          
+            <div className="form-group">
             <label>valorServico</label>
-            <input
-              type="number"
-              className="form-control"
-              id="valorServico"
-              value={props.servico.valorServico}
-              onChange={props.handleInputChange}
-              name="valorServico"
+            <CurrencyInput 
+            value={props.servico.valorServico} 
+            onChangeEvent={mudouvalor}
+            decimalSeparator="," 
+            thousandSeparator="."
+            prefix="R$"
+            className="form-control"
+            name="valorServico"
             />
           </div>
           <div className="form-group">

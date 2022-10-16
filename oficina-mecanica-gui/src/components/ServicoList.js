@@ -104,6 +104,7 @@ const ServicoList = (props) => {
       .then(response => {
         console.log(response);
         retrieveServicos();
+        props.setUpdated(true)
       })
       .catch(e => {
         console.log(e);
@@ -228,6 +229,7 @@ const [submitted, setSubmitted] = useState(false)
             setServicoCriado(true) //seta para true, que é detectado como mudança em props por AddServico
             console.log(response)
             setSubmitted(true)
+            props.setUpdated(true)
     })
       .catch(e => {
         console.log(e);
@@ -247,6 +249,7 @@ const [submitted, setSubmitted] = useState(false)
   });
   retrieveServicos();//apos fazer update, atualiza lista de servicos
   setServicoCriado(true) //mostra codigo do servico em AddServico
+  props.setUpdated(true)
 console.log(response)
 })
   .catch(e => {
