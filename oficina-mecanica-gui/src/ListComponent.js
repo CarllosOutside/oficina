@@ -64,11 +64,19 @@ console.log(dias)
   const updateCategories = () =>{
     
   }
+
+ const [crud, setCrud] = useState(false) 
 //carrega todas as ordens do corrente mes 
 useEffect(() => {
  //console.log(categories)
 retrieveOrdens()
-}, [props]); 
+}, [props, crud]); 
+
+//funcao executada pelo componente AddOrdemCalendario a fim de atualizar o calendario
+const changeCrud = () =>{
+  setCrud(!crud)
+  //setCrud(!crud)
+}
 
 //adiciona ordens à current ordens lista
   const retrieveOrdens = () =>{
@@ -77,7 +85,7 @@ retrieveOrdens()
     .then(
       response => {
         setCurrentOrdensList(response.data)
-       //console.log(response.data)
+       console.log("lista de ordens", response.data)
        return response.data
       }
     )
@@ -246,7 +254,7 @@ useEffect(() => {
                 return (
                   //Cria elementos draggables 
                   <Drag key={item.id} id={``+item.id} index={index}>
-                    <Cartao item={item} key={item.id}/>
+                    <Cartao item={item} key={item.id} changeCrud = {changeCrud}/>
                   </Drag>
                 );
               })}

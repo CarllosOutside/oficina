@@ -7,6 +7,8 @@ import "bootstrap/dist/css/bootstrap.min.css";
 import Toast from 'react-bootstrap/Toast';
 import ToastContainer from 'react-bootstrap/ToastContainer';
 import ServicoList from "./ServicoList";
+import Form from 'react-bootstrap/Form';
+
 
 const AddOrdem = (props) => {
     const {id} = useParams() //id do cliente na path variable
@@ -173,11 +175,38 @@ const [teste, setTeste] =  useState(true)
               name="valorTotalMaoObra"
             />
           </div>
+          {(props.criada)?  //se o veiculo ja foi criado
+         <div className="form-group">
+         <label>Ordem fechada</label>
+         <Form.Check 
+            type="switch"
+            id="custom-switch"
+            label="Fechar ordem"
+            checked={!props.ordem.aberto}
+            onChange={e => props.handleCheckChange(e)}
+            name="aberto"
+          />
+       </div>
+        : <></>}
+          {(props.criada)?  //se o veiculo ja foi criado
+         <div className="form-group">
+         <label>Veículo devolvido</label>
+         <Form.Check 
+            type="switch"
+            id="custom-switch"
+            label="Devolver veículo"
+            checked={props.ordem.devolvido}
+            onChange={e => props.handleCheckChange(e)}
+            name="devolvido"
+          />
+       </div>
+        : <></>}
+          
           <br/>
         <br/>
         </div>
         <br/><br/>
-        <ServicoList codOrdem={props.ordem.id}/>
+        {props.criada? <ServicoList codOrdem={props.ordem.id}/>:<></>}
         <ToastContainer className="p-3" position={'bottom-center'} style={{zIndex:1050}}>
 
       <Toast onClose={() => props.setSubmitted(false)} show={props.submitted} delay={3000} autohide>

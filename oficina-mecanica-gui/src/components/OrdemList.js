@@ -17,6 +17,9 @@ import ServicoService from  "../Services/ServicoService";
 library.add(faPenToSquare, faTrashCan, faPlus);
 
 const OrdemList = (props) => {
+
+  const veiculoRef = useRef()
+  veiculoRef.current = props.veiculo;
     const navigate = useNavigate();
   const [ordens, setOrdens] = useState([]);
   const [submitted, setSubmitted] = useState(false)
@@ -33,17 +36,30 @@ const OrdemList = (props) => {
         codFuncionario: null,
         dataAbertura: "",
         valorTotalServicos: 0,
-        valorTotalPecas: 0
+        valorTotalPecas: 0,
+        aberto: true,
+        atrasado: false,
+        devolvido: false
         }
       
   const [ordem, setOrdem] = useState(initialOrdemState);
   //o filho acessa props.ordem e muda os valores quando tem seus inputs alterados
   //a ordem é setada no filho, e salva aqui
   const handleInputChange = event => {
+   // console.log(event.target)
     const { name, value } = event.target;
     setOrdem({ ...ordem, [name]: value });
-    //console.log(value)
+    console.log(ordem)
   };
+
+  const handleInputCheckChange = event => {
+    const { name, checked } = event.target;
+    if(name=="aberto")
+    setOrdem({ ...ordem, [name]: !checked });
+    if(name=="devolvido")
+    setOrdem({ ...ordem, [name]: checked });
+    console.log(ordem)
+    };
  
   const [ordemCriada, setOrdemCriada] = useState(false); 
   const [show, setShow] = useState(false);
@@ -75,9 +91,13 @@ const [ajuste, setAjuste] = useState(false)
     const params = getRequestParams(page, pageSize); //pega parametros
 //acha ordens pertencentes a um veiculo
     if(props.veiculo){
-     // console.log(props.veiculo)
-        OrdemService.findByPlaca(props.veiculo.placa, params)//acha lista de ordens por placa
+     console.log("veiculo recebido de props ", props.veiculo, "   -- veiculo salvo do props: ", veiculoRef.current)
+        OrdemService.findByPlaca(veiculoRef.current.placa, params)//acha lista de ordens por placa
             .then(response => { 
+              if(response.status ==204){
+                setOrdens([]);
+                return
+              }  
                const ordensGet = response.data.ordens //lista orndensGet
                const totalPages = response.data.totalPages
               //Busca valores em peças e mao de obra para cada ordem da lista
@@ -91,8 +111,6 @@ const [ajuste, setAjuste] = useState(false)
                 })
                setOrdens(ordensGet);
                setCount(totalPages);
-             if(response.status ==204)
-              setOrdens([]);
        //console.log("ordens com valores: ", ordens);
       })
       .catch(e => {
@@ -133,7 +151,10 @@ const [ajuste, setAjuste] = useState(false)
               codFuncionario: response.data.codFuncionario,
               dataAbertura: response.data.dataAbertura,
               valorTotalServicos: response2.data.valorTServicos,
-              valorTotalPecas: response2.data.valorTPecas
+              valorTotalPecas: response2.data.valorTPecas,
+              aberto: response.data.aberto,
+              atrasado: response.data.atrasado,
+              devolvido: response.data.devolvido
               });
           })
           .catch(e2 => {
@@ -254,40 +275,49 @@ const [ajuste, setAjuste] = useState(false)
         setOrdem({
             id: response.data.id,
             placa: response.data.placa,
-            codFuncionario: response.data.coFuncionario,
+            codFuncionario: response.data.codFuncionario,
             dataAbertura: response.data.dataAbertura,
             valorTotalServicos: response.data.valorTotalServicos,
-            valorTotalPecas: response.data.valorTotalPecas
+            valorTotalPecas: response.data.valorTotalPecas,
+            aberto: response.data.aberto,
+            atrasado: response.data.atrasado,
+            devolvido: response.data.devolvido
             });
             retrieveOrdens();
         setOrdemCriada(true)
+        setSubmitted(true)
  console.log(response)
     })
       .catch(e => {
         console.log(e);
-      });
-      setSubmitted(true)
+        alert("Um funcionário deve ser selecionado")
+      });   
   };
 const updateOrdem = () =>{
+  console.log(ordem)
   //faz o Put
   OrdemService.update(ordem.id, ordem) 
   .then(response => {
     setOrdem({
         id: response.data.id,
         placa: response.data.placa,
-        codFuncionario: response.data.coFuncionario,
+        codFuncionario: response.data.codFuncionario,
         dataAbertura: response.data.dataAbertura,
         valorTotalServicos: response.data.valorTotalServicos,
-        valorTotalPecas: response.data.valorTotalPecas
+        valorTotalPecas: response.data.valorTotalPecas,
+        aberto: response.data.aberto,
+        atrasado: response.data.atrasado,
+        devolvido: response.data.devolvido
         });
         retrieveOrdens();
     setOrdemCriada(true)
+    setSubmitted(true)
+
 console.log(response)
 })
   .catch(e => {
     console.log(e);
   });
-  setSubmitted(true)
 }
 
   return (
@@ -360,7 +390,8 @@ console.log(response)
           <Modal.Title>Cadastro de Ordens</Modal.Title>
         </Modal.Header>
         <Modal.Body>
-         <AddOrdem ordem={ordem} veiculo={props.veiculo} handleInputChange = {handleInputChange} criada={ordemCriada} submitted={submitted} setSubmitted={setSubmitted}/>
+         <AddOrdem ordem={ordem} veiculo={props.veiculo} handleInputChange = {handleInputChange} criada={ordemCriada} submitted={submitted} setSubmitted={setSubmitted}
+         handleCheckChange={handleInputCheckChange}/>
         </Modal.Body>
         <Modal.Footer>
           <Button variant="secondary" onClick={handleClose}>

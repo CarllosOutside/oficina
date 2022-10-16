@@ -18,11 +18,15 @@ import OverlayTrigger from 'react-bootstrap/OverlayTrigger';
 import Tooltip from 'react-bootstrap/Tooltip';
 
 export const Cartao = (props) => {
+useEffect(()=>{},[props])
+
   const [collapse, setCollapse] = useState(false);
   const toggle = () => setCollapse(!collapse);
 
   const [item, setItem] = useState(props.item);
- 
+  const colorBody = item.aberto? "lightblue" : "green" //orden fechada = verde
+  const colorHead = item.devolvido? "blue" : colorBody //veiculo devolvido -> header azul
+
   const setValores = () =>{
     ServicoService.getValores(item.id)
     .then(response =>{
@@ -34,6 +38,7 @@ export const Cartao = (props) => {
   const [showOrdem, setShowOrdem] = useState(false);
   const handleCloseOrdem = () => setShowOrdem(false);
   const handleShowOrdem = () => setShowOrdem(true);
+  
  return (
   <div>
     <Card
@@ -48,8 +53,8 @@ export const Cartao = (props) => {
         border: 0
       }}
   >
-    {console.log("render")}
-      <CardHeader style={{ fontSize: "1.4vw", backgroundColor: item.plac }}>
+    {console.log(item, "----", colorBody, "---", colorHead)}
+      <CardHeader style={{ fontSize: "1.4vw", backgroundColor: colorHead }}>
         <div style={{display:"flex"}}>
           <div style={{flex:"90%"}}>Placa: {item.placa}</div> 
           <span onClick={handleShowOrdem} style={{flex:"10%"}}>
@@ -67,7 +72,7 @@ export const Cartao = (props) => {
           </span>
         </div>
       </CardHeader>
-      <CardBody style={{ backgroundColor: item.bcolor }}>
+      <CardBody style={{ backgroundColor: colorBody}}>
         <Collapse isOpen={collapse}>
           <CardText style={{ fontSize: "1.2vw" }}>
             <div>Modelo: {item.veiculo.marca+" - "+item.veiculo.modelo}</div>
@@ -99,7 +104,7 @@ export const Cartao = (props) => {
         <Modal.Header closeButton>
         <Modal.Title>Cadastrar uma ordem</Modal.Title>    
         </Modal.Header>
-        <Modal.Body> <CadastroDeOrdemCalendario ordemAberta={item}/></Modal.Body>
+        <Modal.Body> <CadastroDeOrdemCalendario ordemAberta={item} changeCrud={props.changeCrud}/></Modal.Body>
         <Modal.Footer>
          <Button variant="danger" onClick={handleCloseOrdem} style={{position:"absolute", left:"0px", bottom:"1px"}}>
             Voltar

@@ -9,7 +9,12 @@ import ToastContainer from 'react-bootstrap/ToastContainer';
 import ServicoList from "./ServicoList";
 import Button from 'react-bootstrap/Button';
 import OrdemService from "../Services/OrdemService";
+import Form from 'react-bootstrap/Form';
+import { BiWindows } from "react-icons/bi";
+
 const CadastroDeOrdemCalendario = (props) => {
+
+const navigate = useNavigate()
 
   //estado inicial da ordem
   const initialOrdemState = {
@@ -18,7 +23,10 @@ const CadastroDeOrdemCalendario = (props) => {
     codFuncionario: null,
     dataAbertura: null,
     valorTotalPecas: 0,
-    valorTotalServicos: 0
+    valorTotalServicos: 0,
+    aberto: true,
+    atrasado: false,
+    devolvido: false
   }
 
   //ordem
@@ -38,6 +46,12 @@ const CadastroDeOrdemCalendario = (props) => {
     const [funcionarios, setFuncionarios] = useState([])
     const [currentFuncionario, setCurrentFuncionario] = useState(initialFunc)
     const [dropDown, setDropDown] = useState(false)
+
+   //ao selecionar um funcionario do dropdown, atualiza ordem no campo codFuncionario
+useEffect(()=>{
+  setOrdem({...ordem, codFuncionario: currentFuncionario.cod_funcionario})
+}, [currentFuncionario])
+
 
   //verifica se esta editando uma ordem de um cartão
   useEffect(()=>{
@@ -62,7 +76,8 @@ const CadastroDeOrdemCalendario = (props) => {
           console.log(e);
         });
     };
-    //busca o funcionario responsavel pela ordem
+
+    //atualiza o campo codFuncionario de uma ordem existente, atualiza seu campo funcionario
     useEffect(() => {
       if(criada)
           getCurrentFuncionario();
@@ -72,7 +87,7 @@ const CadastroDeOrdemCalendario = (props) => {
       FuncionarioService.get(ordem.codFuncionario)
       .then(response => {
         setCurrentFuncionario(response.data);
-        console.log(response.data);
+        //console.log("funcionario atual ", response.data);
       })
       .catch(e => {
         console.log(e);
@@ -104,14 +119,18 @@ const CadastroDeOrdemCalendario = (props) => {
         setOrdem({
           id: response2.data.id,
           placa: response2.data.placa,
-          codFuncionario: response2.data.coFuncionario,
+          codFuncionario: response2.data.codFuncionario,
           dataAbertura: response2.data.dataAbertura,
           valorTotalServicos: response2.data.valorTotalServicos,
-          valorTotalPecas: response2.data.valorTotalPecas
+          valorTotalPecas: response2.data.valorTotalPecas,
+          aberto: response2.data.aberto,
+          atrasado: response2.data.atrasado,
+          devolvido: response2.data.devolvido
           });
           console.log("ordem criada: ",ordem)
           setCriada(true)
           setSubmitted(true)
+          props.changeCrud()
       })
       .catch(e2 =>{
         console.log(e2)
@@ -125,25 +144,40 @@ const CadastroDeOrdemCalendario = (props) => {
 
  //Faz update da ordem preenchida
   const updateOrdem = () =>{
+    console.log("ordem a ser atualizada", ordem)
     //faz o Put, a placa ja esta setada
     OrdemService.update(ordem.id, ordem) 
     .then(response => {
       setOrdem({
           id: response.data.id,
           placa: response.data.placa,
-          codFuncionario: response.data.coFuncionario,
+          codFuncionario: response.data.codFuncionario,
           dataAbertura: response.data.dataAbertura,
           valorTotalServicos: response.data.valorTotalServicos,
-          valorTotalPecas: response.data.valorTotalPecas
+          valorTotalPecas: response.data.valorTotalPecas,
+          aberto: response.data.aberto,
+          atrasado: response.data.atrasado,
+          devolvido: response.data.devolvido
           });
           setCriada(true)
           setSubmitted(true)
           console.log(response)
+         window.location.reload()
   })
     .catch(e => {
       console.log(e);
     });
   }
+
+  const handleCheckChange = event => {
+    const { name, checked } = event.target;
+    if(name=="aberto")
+    setOrdem({ ...ordem, [name]: !checked });
+    if(name=="devolvido")
+    setOrdem({ ...ordem, [name]: checked });
+    console.log(ordem)
+    };
+
 
   //Renderiza componente
   return (
@@ -244,6 +278,33 @@ const CadastroDeOrdemCalendario = (props) => {
               name="valorTotalMaoObra"
             />
           </div>
+          {(criada)?  //se o veiculo ja foi criado
+         <div className="form-group">
+         <label>Ordem fechada</label>
+         <Form.Check 
+            type="switch"
+            id="custom-switch"
+            label="Fechar ordem"
+            checked={!ordem.aberto}
+            onChange={e => handleCheckChange(e)}
+            name="aberto"
+          />
+       </div>
+        : <></>}
+          {(criada)?  //se o veiculo ja foi criado
+         <div className="form-group">
+         <label>Veículo devolvido</label>
+         <Form.Check 
+            type="switch"
+            id="custom-switch"
+            label="Devolver veículo"
+            checked={ordem.devolvido}
+            onChange={e => handleCheckChange(e)}
+            name="devolvido"
+          />
+       </div>
+        : <></>}
+
           <br/>
           <div style={{position:"absolute",right:"10px"}}>
             <Button onClick={criada?updateOrdem:salvaOrdem}>Salvar ordem</Button>
