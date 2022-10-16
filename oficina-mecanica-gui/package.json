@@ -1,8 +1,10 @@
 {
   "name": "oficina-mecanica-gui",
   "version": "0.1.0",
+  "main": "server.js",
   "engines": {
-    "node": "10.15.3"
+    "node": "16.18.0",
+    "npm": "8.19.2"
  },
   "private": true,
   "dependencies": {
@@ -43,7 +45,7 @@
     "eject": "react-scripts eject",
     "dev": "react-scripts start",
     "start": "node server.js",
-    "heroku-postbuild": "npm run build"
+    "heroku-postbuild": "npm install"
   },
   "eslintConfig": {
     "extends": [
